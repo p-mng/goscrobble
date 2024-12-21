@@ -63,7 +63,7 @@ After creating the config file, start the systemd user service using `systemctl 
 
 ### Double scrobbles when using tidal-hifi
 
-tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right now, you should add `tidal-hifi` to your blacklist, as the playlist name is incorrectly reported as the album name (see [tidal-hifi issue 5505](https://github.com/Mastermindzh/tidal-hifi/issues/505)).
+tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right now, you should add `tidal-hifi` to your blacklist, as the playlist name is incorrectly reported as the album name (see [tidal-hifi issue 505](https://github.com/Mastermindzh/tidal-hifi/issues/505)).
 
 ## Similar projects
 
