@@ -18,10 +18,10 @@ const (
 )
 
 type NowPlaying struct {
-	Artists []string
-	Track   string
-	Album   string
-	Length  int64
+	Artists  []string
+	Track    string
+	Album    string
+	Duration int64
 
 	PlaybackStatus string
 	Position       int64
@@ -69,7 +69,7 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 		track, err1 := getMapEntry[string](*metadata, "xesam:title")
 		artists, err2 := getMapEntry[[]string](*metadata, "xesam:artist")
 		album, err3 := getMapEntry[string](*metadata, "xesam:album")
-		length, err4 := getMapEntry[int64](*metadata, "mpris:length")
+		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
 			log.Printf("error parsing metadata for player %s: %v", player, err)
@@ -80,7 +80,7 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,
-			Length:         *length / 1_000_000,
+			Duration:       *duration / 1_000_000,
 			PlaybackStatus: *playbackStatus,
 			Position:       *position / 1_000_000,
 		}

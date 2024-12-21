@@ -97,7 +97,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				status.Track,
 				strings.Join(status.Artists, ", "),
 				formatDuration(minPlayTime),
-				formatDuration(status.Length),
+				formatDuration(status.Duration),
 			)
 			scrobbledPrevious[player] = true
 
@@ -111,11 +111,11 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 }
 
 func minPlayTime(nowPlaying NowPlaying, config *Config) (int64, error) {
-	if nowPlaying.Length < 0 {
-		return 0, fmt.Errorf("invalid track length: %d", nowPlaying.Length)
+	if nowPlaying.Duration < 0 {
+		return 0, fmt.Errorf("invalid track length: %d", nowPlaying.Duration)
 	}
 
-	half := int64((float64(nowPlaying.Length) / 100) * float64(config.MinPlaybackPercent))
+	half := int64((float64(nowPlaying.Duration) / 100) * float64(config.MinPlaybackPercent))
 	return min(half, config.MinPlaybackDuration), nil
 }
 

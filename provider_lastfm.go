@@ -25,6 +25,7 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
+		"duration":  n.Duration,
 		"timestamp": time.Now().Unix(),
 	})
 	if err != nil {
@@ -52,6 +53,7 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
+		"duration":  n.Duration,
 		"timestamp": time.Now().Unix(),
 	})
 	if err != nil {

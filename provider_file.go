@@ -21,7 +21,7 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 	filename := f.Filename
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Printf("[file] error opening scrobbles.csv: %v", err)
+		log.Printf("[file] error opening %s: %v", filename, err)
 		return
 	}
 	defer file.Close()
