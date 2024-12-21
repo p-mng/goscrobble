@@ -1,5 +1,7 @@
 # goscrobble 🎧💿
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/p-mng/goscrobble/go.yml) ![GitHub Tag](https://img.shields.io/github/v/tag/p-mng/goscrobble) ![AUR Version](https://img.shields.io/aur/version/goscrobble)
+
 ## Description
 
 `goscrobble` is a simple music scrobbler daemon for MPRIS-based music players (e.g. [Spotify](https://www.spotify.com/de/download/linux/) or [tidal-hifi](https://github.com/Mastermindzh/tidal-hifi)).
