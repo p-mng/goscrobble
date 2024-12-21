@@ -1,4 +1,4 @@
-module goscrobble
+module github.com/p-mng/goscrobble
 
 go 1.23.4
 
