@@ -32,8 +32,8 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 		strings.Join(n.Artists, ", "),
 		strconv.FormatInt(time.Now().Unix(), 10),
 	}, "|")
-	_, err = file.WriteString(fmt.Sprintf("%s\n", line))
-	if err != nil {
+
+	if _, err := file.WriteString(fmt.Sprintf("%s\n", line)); err != nil {
 		log.Printf("[file] error writing scrobble: %v", err)
 		return
 	}

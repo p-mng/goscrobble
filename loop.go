@@ -10,8 +10,6 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
-const PollFrequency = 2000
-
 func RunMainLoop(conn *dbus.Conn, config *Config) {
 	previouslyPlaying := map[string]NowPlaying{}
 	scrobbledPrevious := map[string]bool{}
@@ -100,7 +98,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			}
 		}
 
-		time.Sleep(time.Millisecond * PollFrequency)
+		time.Sleep(time.Millisecond * time.Duration(config.PollRate))
 	}
 }
 

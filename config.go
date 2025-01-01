@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	PollRate            int      `toml:"poll_rate" comment:"track position update frequency in seconds"`
 	MinPlaybackDuration int64    `toml:"min_playback_duration" comment:"minimum playback duration in seconds"`
 	MinPlaybackPercent  int64    `toml:"min_playback_percent" comment:"minimum playback percentage"`
 	Blacklist           []string `toml:"blacklist" comment:"MPRIS player blacklist"`
@@ -49,6 +50,7 @@ func ReadConfig() (*Config, error) {
 	data, err := os.ReadFile(fileName)
 	if os.IsNotExist(err) {
 		defaultConfig := Config{
+			PollRate:            2,
 			MinPlaybackDuration: 4 * 60,
 			MinPlaybackPercent:  50,
 			Blacklist:           []string{},
@@ -60,8 +62,7 @@ func ReadConfig() (*Config, error) {
 			return nil, err
 		}
 
-		err = os.WriteFile(fileName, defaultMarshalled, 0600)
-		if err != nil {
+		if err := os.WriteFile(fileName, defaultMarshalled, 0600); err != nil {
 			return nil, err
 		}
 
@@ -69,15 +70,18 @@ func ReadConfig() (*Config, error) {
 	} else if err != nil {
 		return nil, err
 	}
-	config := Config{}
 
-	err = toml.Unmarshal(data, &config)
-	if err != nil {
+	config := Config{}
+	if err := toml.Unmarshal(data, &config); err != nil {
 		return nil, err
 	}
 
+	if config.PollRate <= 0 || config.PollRate > 60 {
+		config.PollRate = 2
+	}
+
 	// https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
-	if config.MinPlaybackDuration <= 0 {
+	if config.MinPlaybackDuration <= 0 || config.MinPlaybackDuration > 20*60 {
 		config.MinPlaybackDuration = 4 * 60
 	}
 	if config.MinPlaybackPercent <= 0 || config.MinPlaybackPercent > 100 {

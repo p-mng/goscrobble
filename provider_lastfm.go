@@ -21,14 +21,13 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 	}
 
 	// https://www.last.fm/api/show/track.updateNowPlaying
-	_, err = api.Track.UpdateNowPlaying(lastfm.P{
+	if _, err := api.Track.UpdateNowPlaying(lastfm.P{
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
 		"duration":  n.Duration,
 		"timestamp": time.Now().Unix(),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Printf("[lastfm] error updating now playing status: %v", err)
 		return
 	}
@@ -49,14 +48,13 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 	}
 
 	// https://www.last.fm/api/show/track.scrobble
-	_, err = api.Track.Scrobble(lastfm.P{
+	if _, err := api.Track.Scrobble(lastfm.P{
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
 		"duration":  n.Duration,
 		"timestamp": time.Now().Unix(),
-	})
-	if err != nil {
+	}); err != nil {
 		log.Printf("[lastfm] error scrobbling: %v", err)
 		return
 	}
