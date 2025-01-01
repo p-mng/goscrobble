@@ -48,11 +48,7 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 		}
 	}
 
-	if len(playerNames) == 0 {
-		return nil, nil
-	}
-
-	info := make(map[string]NowPlaying)
+	info := map[string]NowPlaying{}
 
 	for _, player := range playerNames {
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
@@ -90,26 +86,26 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 }
 
 func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {
-	val, err := obj.GetProperty(property)
+	value, err := obj.GetProperty(property)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get property: %v", err)
 	}
 
-	if value, ok := val.Value().(E); ok {
-		return &value, nil
+	if parsedValue, ok := value.Value().(E); ok {
+		return &parsedValue, nil
 	} else {
 		return nil, errors.New("failed to read property from DBus object")
 	}
 }
 
 func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error) {
-	val, ok := metadata[key]
+	value, ok := metadata[key]
 	if !ok {
 		return nil, fmt.Errorf("map entry with key %s not found", key)
 	}
 
-	if content, ok := val.Value().(E); ok {
-		return &content, nil
+	if parsedValue, ok := value.Value().(E); ok {
+		return &parsedValue, nil
 	} else {
 		return nil, fmt.Errorf("invalid data type for map entry %s", key)
 	}
