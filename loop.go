@@ -13,10 +13,10 @@ import (
 const PollFrequency = 2000
 
 func RunMainLoop(conn *dbus.Conn, config *Config) {
-	previouslyPlaying := make(map[string]NowPlaying)
-	scrobbledPrevious := make(map[string]bool)
+	previouslyPlaying := map[string]NowPlaying{}
+	scrobbledPrevious := map[string]bool{}
 
-	blacklist := make([]*regexp.Regexp, 0)
+	var blacklist []*regexp.Regexp
 
 	for _, expression := range config.Blacklist {
 		compiled, err := regexp.Compile(expression)
@@ -102,6 +102,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			scrobbledPrevious[player] = true
 
 			for _, provider := range config.Providers() {
+				provider.NowPlaying(status)
 				provider.Scrobble(status)
 			}
 		}
