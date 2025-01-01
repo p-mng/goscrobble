@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func (f *FileConfig) NowPlaying(n NowPlaying) {
+func (f *FileConfig) NowPlaying(_ NowPlaying) {
 
 }
 

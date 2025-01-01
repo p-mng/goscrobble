@@ -60,7 +60,7 @@ func ReadConfig() (*Config, error) {
 			return nil, err
 		}
 
-		err = os.WriteFile(fileName, defaultMarshalled, 0644)
+		err = os.WriteFile(fileName, defaultMarshalled, 0600)
 		if err != nil {
 			return nil, err
 		}

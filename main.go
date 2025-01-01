@@ -9,13 +9,15 @@ import (
 func main() {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
-		log.Fatalf("failed to connect to session bus: %v", err)
+		log.Printf("failed to connect to session bus: %v", err)
+		return
 	}
 	defer conn.Close()
 
 	config, err := ReadConfig()
 	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+		log.Printf("error reading config: %v", err)
+		return
 	}
 
 	RunMainLoop(conn, config)

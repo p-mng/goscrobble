@@ -93,9 +93,8 @@ func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {
 
 	if parsedValue, ok := value.Value().(E); ok {
 		return &parsedValue, nil
-	} else {
-		return nil, errors.New("failed to read property from DBus object")
 	}
+	return nil, errors.New("failed to read property from DBus object")
 }
 
 func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error) {
@@ -106,7 +105,6 @@ func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error
 
 	if parsedValue, ok := value.Value().(E); ok {
 		return &parsedValue, nil
-	} else {
-		return nil, fmt.Errorf("invalid data type for map entry %s", key)
 	}
+	return nil, fmt.Errorf("invalid data type for map entry %s", key)
 }
