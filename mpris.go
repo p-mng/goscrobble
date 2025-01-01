@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"github.com/godbus/dbus/v5"
@@ -33,7 +34,7 @@ func NowPlayingEquals(left NowPlaying, right NowPlaying) bool {
 		left.Album == right.Album
 }
 
-func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
+func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowPlaying, error) {
 	var dbusNames []string
 	err := conn.Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
 		Call("org.freedesktop.DBus.ListNames", 0).Store(&dbusNames)
@@ -51,6 +52,10 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 	info := map[string]NowPlaying{}
 
 	for _, player := range playerNames {
+		if isBlacklisted(blacklist, player) {
+			continue
+		}
+
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
 
 		metadata, err1 := getProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
@@ -58,7 +63,7 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 		position, err3 := getProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
 
 		if err := errors.Join(err1, err2, err3); err != nil {
-			log.Printf("error reading DBus property for player %s: %v", player, err)
+			log.Printf("error reading DBus properties for player %s", player)
 			continue
 		}
 
@@ -68,7 +73,7 @@ func GetNowPlaying(conn *dbus.Conn) (map[string]NowPlaying, error) {
 		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
-			log.Printf("error parsing metadata for player %s: %v", player, err)
+			log.Printf("error parsing metadata for player %s", player)
 			continue
 		}
 
@@ -107,4 +112,13 @@ func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error
 		return &parsedValue, nil
 	}
 	return nil, fmt.Errorf("invalid data type for map entry %s", key)
+}
+
+func isBlacklisted(blacklist []*regexp.Regexp, player string) bool {
+	for _, re := range blacklist {
+		if re.MatchString(player) {
+			return true
+		}
+	}
+	return false
 }

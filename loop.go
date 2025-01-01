@@ -28,11 +28,11 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 	}
 
 	if len(blacklist) > 0 {
-		log.Printf("ignoring tracks from %d players", len(blacklist))
+		log.Printf("ignoring scrobbles from %d players", len(blacklist))
 	}
 
 	for {
-		nowPlaying, err := GetNowPlaying(conn)
+		nowPlaying, err := GetNowPlaying(conn, blacklist)
 		if err != nil {
 			log.Printf("failed to get current playback status: %v", err)
 			continue
@@ -54,14 +54,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			}
 		}
 
-	outer:
 		for player, status := range nowPlaying {
-			for _, entry := range blacklist {
-				if entry.MatchString(player) {
-					continue outer
-				}
-			}
-
 			minPlayTime, err := minPlayTime(status, config)
 			if err != nil {
 				log.Printf(
