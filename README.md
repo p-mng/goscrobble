@@ -4,7 +4,7 @@
 
 ## Description
 
-`goscrobble` is a simple music scrobbler daemon for MPRIS-based music players (e.g. [Spotify](https://www.spotify.com/de/download/linux/) or [tidal-hifi](https://github.com/Mastermindzh/tidal-hifi)).
+`goscrobble` is a simple music scrobbler daemon for MPRIS-based music players (e.g. [Spotify](https://www.spotify.com/en/download/linux/) or [tidal-hifi](https://github.com/Mastermindzh/tidal-hifi)).
 
 ## Features
 
