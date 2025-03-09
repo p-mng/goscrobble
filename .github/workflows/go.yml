@@ -1,13 +1,10 @@
 name: Go
-
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
-
 jobs:
-
   golangci:
     runs-on: ubuntu-latest
     steps:
@@ -15,11 +12,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -27,5 +22,4 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - name: Build
-        run: go build -v ./...
+      - run: go build -v ./...
