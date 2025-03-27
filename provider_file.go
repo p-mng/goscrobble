@@ -18,13 +18,17 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 		return
 	}
 
-	filename := f.Filename
-	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
+	file, err := os.OpenFile(f.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Printf("[file] error opening %s: %v", filename, err)
+		log.Printf("[file] error opening %s: %v", f.Filename, err)
 		return
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			fmt.Printf("error closing scrobbles file: %v", err)
+		}
+	}(file)
 
 	line := strings.Join([]string{
 		n.Track,
@@ -33,7 +37,7 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 		strconv.FormatInt(time.Now().Unix(), 10),
 	}, "|")
 
-	if _, err := file.WriteString(fmt.Sprintf("%s\n", line)); err != nil {
+	if _, err := fmt.Fprintf(file, "%s\n", line); err != nil {
 		log.Printf("[file] error writing scrobble: %v", err)
 		return
 	}

@@ -12,7 +12,11 @@ func main() {
 		log.Printf("failed to connect to session bus: %v", err)
 		return
 	}
-	defer conn.Close()
+	defer func(conn *dbus.Conn) {
+		if err := conn.Close(); err != nil {
+			log.Printf("error closing dbus connection: %v", err)
+		}
+	}(conn)
 
 	config, err := ReadConfig()
 	if err != nil {

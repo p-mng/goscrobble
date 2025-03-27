@@ -1,3 +1,4 @@
+version: "2"
 linters:
   # https://golangci-lint.run/usage/linters/#enabled-by-default
   enable:
@@ -6,3 +7,6 @@ linters:
     - gosec
     - nilnil
     - revive
+  exclusions:
+    presets:
+      - comments

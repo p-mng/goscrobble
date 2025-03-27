@@ -1,4 +1,3 @@
-name: Go
 on:
   push:
     branches: ["main"]
@@ -12,9 +11,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: stable
-      - uses: golangci/golangci-lint-action@v6
+      - uses: golangci/golangci-lint-action@v7
         with:
-          version: v1.60
+          version: v2.0.2
   build:
     runs-on: ubuntu-latest
     steps:

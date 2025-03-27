@@ -41,12 +41,13 @@ type FileConfig struct {
 func ReadConfig() (*Config, error) {
 	dir := fmt.Sprintf("%s/goscrobble", ConfigDir())
 
-	err := os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(dir, 0700)
 	if err != nil && !os.IsExist(err) {
 		return nil, err
 	}
 
 	fileName := fmt.Sprintf("%s/config.toml", dir)
+	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
 	data, err := os.ReadFile(fileName)
 	if os.IsNotExist(err) {
 		defaultConfig := Config{
