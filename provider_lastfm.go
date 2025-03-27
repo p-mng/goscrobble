@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"strings"
-	"time"
 
 	"github.com/shkh/lastfm-go/lastfm"
 )
@@ -22,11 +21,10 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 
 	// https://www.last.fm/api/show/track.updateNowPlaying
 	if _, err := api.Track.UpdateNowPlaying(lastfm.P{
-		"artist":    strings.Join(n.Artists, ", "),
-		"track":     n.Track,
-		"album":     n.Album,
-		"duration":  n.Duration,
-		"timestamp": time.Now().Unix(),
+		"artist":   strings.Join(n.Artists, ", "),
+		"track":    n.Track,
+		"album":    n.Album,
+		"duration": n.Duration,
 	}); err != nil {
 		log.Printf("[lastfm] error updating now playing status: %v", err)
 		return
@@ -53,7 +51,7 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 		"track":     n.Track,
 		"album":     n.Album,
 		"duration":  n.Duration,
-		"timestamp": time.Now().Unix(),
+		"timestamp": n.Timestamp,
 	}); err != nil {
 		log.Printf("[lastfm] error scrobbling: %v", err)
 		return

@@ -53,21 +53,28 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 		}
 
 		for player, status := range nowPlaying {
+			if !NowPlayingValid(status) {
+				continue
+			}
+
 			minPlayTime, err := minPlayTime(status, config)
 			if err != nil {
 				log.Printf(
-					"[%s] cannot calculate minimum playback time for %s by %s: %v",
+					"[%s] cannot calculate minimum playback time for %s - %s: %v",
 					player,
-					status.Track,
 					strings.Join(status.Artists, ", "),
+					status.Track,
 					err,
 				)
 				continue
 			}
 
 			if !NowPlayingEquals(status, previouslyPlaying[player]) {
-				log.Printf("[%s] started playing %s by %s", player, status.Track, strings.Join(status.Artists, ", "))
+				log.Printf("[%s] started playing %s - %s", player, strings.Join(status.Artists, ", "), status.Track)
+
 				status.Position = 0
+				status.Timestamp = time.Now().Unix()
+
 				previouslyPlaying[player] = status
 				scrobbledPrevious[player] = false
 
@@ -83,22 +90,22 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			}
 
 			log.Printf(
-				"[%s] scrobbling track %s by %s, played %s/%s",
+				"[%s] scrobbling track %s - %s, played %s/%s",
 				player,
-				status.Track,
 				strings.Join(status.Artists, ", "),
+				status.Track,
 				formatDuration(minPlayTime),
 				formatDuration(status.Duration),
 			)
 			scrobbledPrevious[player] = true
 
 			for _, provider := range config.Providers() {
-				provider.NowPlaying(status)
-				provider.Scrobble(status)
+				provider.NowPlaying(previouslyPlaying[player])
+				provider.Scrobble(previouslyPlaying[player])
 			}
 		}
 
-		time.Sleep(time.Millisecond * time.Duration(config.PollRate))
+		time.Sleep(time.Second * time.Duration(config.PollRate))
 	}
 }
 

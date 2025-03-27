@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func (f *FileConfig) NowPlaying(_ NowPlaying) {
@@ -34,7 +33,7 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 		n.Track,
 		n.Album,
 		strings.Join(n.Artists, ", "),
-		strconv.FormatInt(time.Now().Unix(), 10),
+		strconv.FormatInt(n.Timestamp, 10),
 	}, "|")
 
 	if _, err := fmt.Fprintf(file, "%s\n", line); err != nil {

@@ -19,10 +19,11 @@ const (
 )
 
 type NowPlaying struct {
-	Artists  []string
-	Track    string
-	Album    string
-	Duration int64
+	Artists   []string
+	Track     string
+	Album     string
+	Duration  int64
+	Timestamp int64
 
 	PlaybackStatus string
 	Position       int64
@@ -32,6 +33,21 @@ func NowPlayingEquals(left NowPlaying, right NowPlaying) bool {
 	return reflect.DeepEqual(left.Artists, right.Artists) &&
 		left.Track == right.Track &&
 		left.Album == right.Album
+}
+
+func NowPlayingValid(n NowPlaying) bool {
+	switch {
+	case n.Album == "":
+		return false
+	case n.Track == "":
+		return false
+	case strings.Join(n.Artists, ", ") == "":
+		return false
+	case n.Duration == 0:
+		return false
+	default:
+		return true
+	}
 }
 
 func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowPlaying, error) {
@@ -44,7 +60,7 @@ func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowP
 
 	var playerNames []string
 	for _, name := range dbusNames {
-		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") {
+		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !isBlacklisted(blacklist, name) {
 			playerNames = append(playerNames, name)
 		}
 	}
@@ -52,10 +68,6 @@ func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowP
 	info := map[string]NowPlaying{}
 
 	for _, player := range playerNames {
-		if isBlacklisted(blacklist, player) {
-			continue
-		}
-
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
 
 		metadata, err1 := getProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
