@@ -50,7 +50,7 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
-		"duration":  n.Duration,
+		"duration":  Duration(n.Duration),
 		"timestamp": n.Timestamp,
 	}); err != nil {
 		log.Printf("[lastfm] error scrobbling: %v", err)
@@ -58,4 +58,11 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 	}
 
 	log.Println("[lastfm] scrobbled ✅")
+}
+
+func Duration(d int64) int64 {
+	if d < 30 {
+		return 30
+	}
+	return d
 }
