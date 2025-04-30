@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/rs/zerolog/log"
 )
 
 type Config struct {
@@ -90,7 +90,7 @@ func ReadConfig() (*Config, error) {
 	}
 
 	if config.LastFm == nil && config.File == nil {
-		log.Println("no scrobbling providers configured, this is probably not what you want")
+		log.Warn().Msg("no scrobbling providers configured, this is probably not what you want")
 	}
 
 	return &config, nil
@@ -105,7 +105,9 @@ func ConfigDir() string {
 
 	home := os.Getenv("HOME")
 	if home == "" {
-		log.Fatalf("HOME environment variable is not set")
+		// $HOME environment variable is required to be set at all times
+		// https://unix.stackexchange.com/a/123859
+		panic("HOME environment variable is not set")
 	}
 
 	return fmt.Sprintf("%s/.config", home)

@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/rs/zerolog/log"
 )
 
 // https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Enum:Playback_Status
@@ -75,7 +75,10 @@ func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowP
 		position, err3 := getProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
 
 		if err := errors.Join(err1, err2, err3); err != nil {
-			log.Printf("error reading DBus properties for player %s", player)
+			log.Error().
+				Str("player", player).
+				Err(err).
+				Msg("error reading DBus properties for player")
 			continue
 		}
 
@@ -85,7 +88,9 @@ func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowP
 		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
-			log.Printf("error parsing metadata for player %s", player)
+			log.Warn().
+				Str("player", player).
+				Msg("error parsing metadata for player")
 			continue
 		}
 

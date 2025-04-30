@@ -2,11 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
+
+func (f *FileConfig) Name() string {
+	return "local file"
+}
 
 func (f *FileConfig) NowPlaying(_ NowPlaying) {
 
@@ -20,12 +25,16 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
 	file, err := os.OpenFile(f.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Printf("[file] error opening %s: %v", f.Filename, err)
+		log.Error().
+			Str("provider", f.Name()).
+			Str("filename", f.Filename).
+			Err(err).
+			Msg("error opening file")
 		return
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			fmt.Printf("error closing scrobbles file: %v", err)
+			log.Err(err).Msg("error closing scrobbles file")
 		}
 	}(file)
 
@@ -37,9 +46,16 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 	}, "|")
 
 	if _, err := fmt.Fprintf(file, "%s\n", line); err != nil {
-		log.Printf("[file] error writing scrobble: %v", err)
+		log.Error().
+			Str("provider", f.Name()).
+			Str("filename", f.Filename).
+			Err(err).
+			Msg("error writing scrobble to file")
 		return
 	}
 
-	log.Println("[file] scrobbled ✅")
+	log.Info().
+		Str("provider", f.Name()).
+		Interface("status", n).
+		Msg("scrobbled ✅")
 }

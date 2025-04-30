@@ -1,11 +1,15 @@
 package main
 
 import (
-	"log"
 	"strings"
 
+	"github.com/rs/zerolog/log"
 	"github.com/shkh/lastfm-go/lastfm"
 )
+
+func (l *LastFmConfig) Name() string {
+	return "last.fm"
+}
 
 func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 	if l == nil {
@@ -15,7 +19,10 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 	api := lastfm.New(l.Key, l.Secret)
 	err := api.Login(l.Username, l.Password)
 	if err != nil {
-		log.Printf("[lastfm] login error: %v", err)
+		log.Error().
+			Str("provider", l.Name()).
+			Err(err).
+			Msg("login error")
 		return
 	}
 
@@ -26,11 +33,17 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 		"album":    n.Album,
 		"duration": n.Duration,
 	}); err != nil {
-		log.Printf("[lastfm] error updating now playing status: %v", err)
+		log.Error().
+			Str("provider", l.Name()).
+			Err(err).
+			Msg("error updating now playing status")
 		return
 	}
 
-	log.Println("[lastfm] updated now playing status ✅")
+	log.Info().
+		Str("provider", l.Name()).
+		Interface("status", n).
+		Msg("updated now playing status ✅")
 }
 
 func (l *LastFmConfig) Scrobble(n NowPlaying) {
@@ -41,7 +54,10 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 	api := lastfm.New(l.Key, l.Secret)
 	err := api.Login(l.Username, l.Password)
 	if err != nil {
-		log.Printf("[lastfm] login error: %v", err)
+		log.Error().
+			Str("provider", l.Name()).
+			Err(err).
+			Msg("login error")
 		return
 	}
 
@@ -50,19 +66,18 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 		"artist":    strings.Join(n.Artists, ", "),
 		"track":     n.Track,
 		"album":     n.Album,
-		"duration":  Duration(n.Duration),
+		"duration":  max(n.Duration, 30),
 		"timestamp": n.Timestamp,
 	}); err != nil {
-		log.Printf("[lastfm] error scrobbling: %v", err)
+		log.Error().
+			Str("provider", l.Name()).
+			Err(err).
+			Msg("error sending scrobble")
 		return
 	}
 
-	log.Println("[lastfm] scrobbled ✅")
-}
-
-func Duration(d int64) int64 {
-	if d < 30 {
-		return 30
-	}
-	return d
+	log.Info().
+		Str("provider", l.Name()).
+		Interface("status", n).
+		Msg("saved scrobble ✅")
 }
