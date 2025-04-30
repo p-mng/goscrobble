@@ -18,6 +18,8 @@
 The following configuration file (created automatically in `~/.config/goscrobble/config.toml`) can be used to scrobble to last.fm and a local file:
 
 ```toml
+# track position update frequency in seconds
+poll_rate = 2
 # minimum playback duration in seconds
 min_playback_duration = 240
 # minimum playback percentage
