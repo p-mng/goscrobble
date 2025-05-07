@@ -46,7 +46,7 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) {
 	log.Info().
 		Str("provider", l.Name()).
 		Interface("status", n).
-		Msg("updated now playing status ✅")
+		Msg("updated now playing status")
 }
 
 func (l *LastFmConfig) Scrobble(n NowPlaying) {
@@ -82,7 +82,7 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) {
 	log.Info().
 		Str("provider", l.Name()).
 		Interface("status", n).
-		Msg("saved scrobble ✅")
+		Msg("saved scrobble")
 }
 
 func (l *LastFmConfig) CreateSession() error {

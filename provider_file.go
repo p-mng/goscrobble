@@ -57,5 +57,5 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 	log.Info().
 		Str("provider", f.Name()).
 		Interface("status", n).
-		Msg("scrobbled ✅")
+		Msg("scrobbled")
 }
