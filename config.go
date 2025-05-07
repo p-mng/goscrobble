@@ -30,7 +30,7 @@ func (c Config) Providers() []Provider {
 type LastFmConfig struct {
 	Key        string `toml:"key" comment:"API key"`
 	Secret     string `toml:"secret" comment:"shared secret"`
-	SessionKey string `toml:"session_key" comment:"session key (generated using goscrobble auth)"`
+	SessionKey string `toml:"session_key" comment:"session key (automatically generated using goscrobble auth)"`
 }
 
 type FileConfig struct {

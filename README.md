@@ -29,10 +29,9 @@ blacklist = [ "chromium", "firefox" ]
 
 # last.fm configuration
 [lastfm]
-username = "<username>"
-password = "<password>"
 key = "<API key>"
 secret = "<shared secret>"
+session_key = "<session key (automatically generated using goscrobble auth)>"
 
 # local file configuration
 [file]
@@ -60,6 +59,13 @@ makepkg -crsi
 ```
 
 After creating the config file, start the systemd user service using `systemctl --user enable --now goscrobble.service`. If you installed the package using `go` directly from git, you might need to update the `.service` file with your correct binary location (likely `~/go/bin/goscrobble`) and copy the service file to `~/.config/systemd/user`.
+
+## Connect last.fm account
+
+1. [Create an API account](https://www.last.fm/api/account/create). Description, callback URL, and application homepage are not required.
+2. Create the `lastfm` section in your config file and enter the newly generated API key and shared secret.
+3. Run `goscrobble auth`, and authenticate the application in your browser.
+4. Confirm the following prompt with `y`, the session key will be automatically written to your config file.
 
 ## Known issues
 
