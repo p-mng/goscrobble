@@ -88,6 +88,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	if config.LastFm == nil || config.LastFm.Key == "" || config.LastFm.Secret == "" {
 		log.Error().Msg("last.fm provider is not configured")
+		return nil
 	}
 
 	api := lastfm.New(config.LastFm.Key, config.LastFm.Secret)
@@ -97,6 +98,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 		log.Error().Err(err).Msg("failed to generate last.fm request token")
 		return nil
 	}
+
 	authURL := api.GetAuthTokenUrl(token)
 
 	//nolint:gosec // authURL comes from shkh/lastfm-go and cannot be set by an attacker
@@ -118,6 +120,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	if err := api.LoginWithToken(token); err != nil {
 		log.Error().Err(err).Msg("failed to authenticate using request token")
+		return nil
 	}
 
 	sessionKey := api.GetSessionKey()
@@ -126,6 +129,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	if err := config.WriteConfig(); err != nil {
 		log.Error().Err(err).Msg("failed to write updated config file")
+		return nil
 	}
 
 	return nil
