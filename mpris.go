@@ -52,9 +52,10 @@ func NowPlayingValid(n NowPlaying) bool {
 
 func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowPlaying, error) {
 	var dbusNames []string
-	err := conn.Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
-		Call("org.freedesktop.DBus.ListNames", 0).Store(&dbusNames)
-	if err != nil {
+	if err := conn.
+		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
+		Call("org.freedesktop.DBus.ListNames", 0).
+		Store(&dbusNames); err != nil {
 		return nil, err
 	}
 

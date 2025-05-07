@@ -28,10 +28,9 @@ func (c Config) Providers() []Provider {
 }
 
 type LastFmConfig struct {
-	Username string `toml:"username" comment:"username"`
-	Password string `toml:"password" comment:"password"`
-	Key      string `toml:"key" comment:"API key"`
-	Secret   string `toml:"secret" comment:"shared secret"`
+	Key        string `toml:"key" comment:"API key"`
+	Secret     string `toml:"secret" comment:"shared secret"`
+	SessionKey string `toml:"session_key" comment:"session key (generated using goscrobble auth)"`
 }
 
 type FileConfig struct {
@@ -39,14 +38,13 @@ type FileConfig struct {
 }
 
 func ReadConfig() (*Config, error) {
-	dir := fmt.Sprintf("%s/goscrobble", ConfigDir())
+	configDir := ConfigDir()
 
-	err := os.MkdirAll(dir, 0700)
-	if err != nil && !os.IsExist(err) {
+	if err := os.MkdirAll(configDir, 0700); err != nil && !os.IsExist(err) {
 		return nil, err
 	}
 
-	fileName := fmt.Sprintf("%s/config.toml", dir)
+	fileName := fmt.Sprintf("%s/config.toml", configDir)
 	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
 	data, err := os.ReadFile(fileName)
 	if os.IsNotExist(err) {
@@ -93,14 +91,30 @@ func ReadConfig() (*Config, error) {
 		log.Warn().Msg("no scrobbling providers configured, this is probably not what you want")
 	}
 
+	if config.LastFm != nil && config.LastFm.SessionKey == "" {
+		log.Warn().Msg("last.fm provider is configured, but not authenticated: run goscrobble auth to generate a token")
+	}
+
 	return &config, nil
 }
 
-// https://wiki.archlinux.org/title/XDG_Base_Directory
+func (c *Config) WriteConfig() error {
+	configDir := ConfigDir()
+	fileName := fmt.Sprintf("%s/config.toml", configDir)
+
+	data, err := toml.Marshal(c)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(fileName, data, 0600)
+}
+
 func ConfigDir() string {
+	// https://wiki.archlinux.org/title/XDG_Base_Directory
 	xdgConfigHome := os.Getenv("XDG_CONFIG_HOME")
 	if xdgConfigHome != "" {
-		return xdgConfigHome
+		return fmt.Sprintf("%s/goscrobble", xdgConfigHome)
 	}
 
 	home := os.Getenv("HOME")
@@ -110,5 +124,5 @@ func ConfigDir() string {
 		panic("HOME environment variable is not set")
 	}
 
-	return fmt.Sprintf("%s/.config", home)
+	return fmt.Sprintf("%s/.config/goscrobble", home)
 }
