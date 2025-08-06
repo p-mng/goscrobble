@@ -27,6 +27,19 @@ min_playback_percent = 50
 # MPRIS player blacklist
 blacklist = [ "chromium", "firefox" ]
 
+# regex match/replace
+[[regexes]]
+match = ' \([0-9]+ Remaster(ed)?\)'
+replace = ""
+artist = false
+album = true
+track = true
+
+[[regexes]]
+match = " - Radio Edit"
+replace = " (Radio Edit)"
+track = true
+
 # last.fm configuration
 [lastfm]
 key = "<API key>"
