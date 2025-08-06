@@ -71,6 +71,7 @@ func cmdRun(_ context.Context, cmd *cli.Command) error {
 		log.Error().Err(err).Msg("error reading config file")
 		return nil
 	}
+	log.Debug().Any("config", config).Msg("parsed config")
 
 	RunMainLoop(conn, config)
 

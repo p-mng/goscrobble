@@ -33,8 +33,11 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 		blacklist = append(blacklist, compiled)
 	}
 
+	parsedRegexes := config.ParseRegexes()
+	log.Debug().Msg("parsed match/replace expressions")
+
 	for {
-		nowPlaying, err := GetNowPlaying(conn, blacklist)
+		nowPlaying, err := GetNowPlaying(conn, blacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue

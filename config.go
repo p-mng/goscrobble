@@ -3,19 +3,29 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/rs/zerolog/log"
 )
 
 type Config struct {
-	PollRate            int      `toml:"poll_rate" comment:"track position update frequency in seconds"`
-	MinPlaybackDuration int64    `toml:"min_playback_duration" comment:"minimum playback duration in seconds"`
-	MinPlaybackPercent  int64    `toml:"min_playback_percent" comment:"minimum playback percentage"`
-	Blacklist           []string `toml:"blacklist" comment:"MPRIS player blacklist"`
+	PollRate            int          `toml:"poll_rate" comment:"track position update frequency in seconds"`
+	MinPlaybackDuration int64        `toml:"min_playback_duration" comment:"minimum playback duration in seconds"`
+	MinPlaybackPercent  int64        `toml:"min_playback_percent" comment:"minimum playback percentage"`
+	Blacklist           []string     `toml:"blacklist" comment:"MPRIS player blacklist"`
+	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
 
 	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`
 	File   *FileConfig   `toml:"file" comment:"local file configuration"`
+}
+
+type RegexEntry struct {
+	Match   string `toml:"match"`
+	Replace string `toml:"replace"`
+	Artist  bool   `toml:"artist"`
+	Track   bool   `toml:"track"`
+	Album   bool   `toml:"album"`
 }
 
 func (c Config) Providers() []Provider {
@@ -25,6 +35,31 @@ func (c Config) Providers() []Provider {
 	providers = append(providers, c.File)
 
 	return providers
+}
+
+func (c Config) ParseRegexes() []ParsedRegexEntry {
+	var parsed []ParsedRegexEntry
+
+	for _, r := range c.Regexes {
+		match, err := regexp.Compile(r.Match)
+		if err != nil {
+			log.
+				Warn().
+				Err(err).
+				Str("expression", r.Match).
+				Msg("error compiling match/repalce expression")
+			continue
+		}
+		parsed = append(parsed, ParsedRegexEntry{
+			Match:   match,
+			Replace: r.Replace,
+			Artist:  r.Artist,
+			Track:   r.Track,
+			Album:   r.Album,
+		})
+	}
+
+	return parsed
 }
 
 type LastFmConfig struct {

@@ -29,6 +29,14 @@ type NowPlaying struct {
 	Position       int64
 }
 
+type ParsedRegexEntry struct {
+	Match   *regexp.Regexp
+	Replace string
+	Artist  bool
+	Track   bool
+	Album   bool
+}
+
 func NowPlayingEquals(left NowPlaying, right NowPlaying) bool {
 	return reflect.DeepEqual(left.Artists, right.Artists) &&
 		left.Track == right.Track &&
@@ -50,7 +58,11 @@ func NowPlayingValid(n NowPlaying) bool {
 	}
 }
 
-func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowPlaying, error) {
+func GetNowPlaying(
+	conn *dbus.Conn,
+	blacklist []*regexp.Regexp,
+	regexes []ParsedRegexEntry,
+) (map[string]NowPlaying, error) {
 	var dbusNames []string
 	if err := conn.
 		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
@@ -83,10 +95,32 @@ func GetNowPlaying(conn *dbus.Conn, blacklist []*regexp.Regexp) (map[string]NowP
 			continue
 		}
 
-		track, err1 := getMapEntry[string](*metadata, "xesam:title")
-		artists, err2 := getMapEntry[[]string](*metadata, "xesam:artist")
+		artists, err1 := getMapEntry[[]string](*metadata, "xesam:artist")
+		track, err2 := getMapEntry[string](*metadata, "xesam:title")
 		album, err3 := getMapEntry[string](*metadata, "xesam:album")
 		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
+
+		for _, r := range regexes {
+			log.Debug().
+				Str("expression", r.Match.String()).
+				Str("replacement", r.Replace).
+				Msg("running match/replace substitution")
+
+			if r.Artist {
+				var newArtists []string
+				for _, artist := range *artists {
+					newArtist := r.Match.ReplaceAllString(artist, r.Replace)
+					newArtists = append(newArtists, newArtist)
+				}
+				*artists = newArtists
+			}
+			if r.Track {
+				*track = r.Match.ReplaceAllString(*track, r.Replace)
+			}
+			if r.Album {
+				*album = r.Match.ReplaceAllString(*album, r.Replace)
+			}
+		}
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
 			log.Warn().
