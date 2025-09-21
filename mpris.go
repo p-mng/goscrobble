@@ -100,6 +100,13 @@ func GetNowPlaying(
 		album, err3 := getMapEntry[string](*metadata, "xesam:album")
 		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
 
+		if err := errors.Join(err1, err2, err3, err4); err != nil {
+			log.Warn().
+				Str("player", player).
+				Msg("error parsing metadata for player")
+			continue
+		}
+
 		for _, r := range regexes {
 			log.Debug().
 				Str("expression", r.Match.String()).
@@ -120,13 +127,6 @@ func GetNowPlaying(
 			if r.Album {
 				*album = r.Match.ReplaceAllString(*album, r.Replace)
 			}
-		}
-
-		if err := errors.Join(err1, err2, err3, err4); err != nil {
-			log.Warn().
-				Str("player", player).
-				Msg("error parsing metadata for player")
-			continue
 		}
 
 		info[player] = NowPlaying{
