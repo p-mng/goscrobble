@@ -28,11 +28,25 @@ type RegexEntry struct {
 	Album   bool   `toml:"album"`
 }
 
+type LastFmConfig struct {
+	Key        string `toml:"key" comment:"API key"`
+	Secret     string `toml:"secret" comment:"shared secret"`
+	SessionKey string `toml:"session_key" comment:"session key (automatically generated using goscrobble auth)"`
+}
+
+type FileConfig struct {
+	Filename string `toml:"filename" comment:"file to write scrobbles to"`
+}
+
 func (c Config) Providers() []Provider {
 	providers := make([]Provider, 0)
 
-	providers = append(providers, c.LastFm)
-	providers = append(providers, c.File)
+	if c.LastFm != nil {
+		providers = append(providers, c.LastFm)
+	}
+	if c.File != nil {
+		providers = append(providers, c.File)
+	}
 
 	return providers
 }
@@ -60,16 +74,6 @@ func (c Config) ParseRegexes() []ParsedRegexEntry {
 	}
 
 	return parsed
-}
-
-type LastFmConfig struct {
-	Key        string `toml:"key" comment:"API key"`
-	Secret     string `toml:"secret" comment:"shared secret"`
-	SessionKey string `toml:"session_key" comment:"session key (automatically generated using goscrobble auth)"`
-}
-
-type FileConfig struct {
-	Filename string `toml:"filename" comment:"file to write scrobbles to"`
 }
 
 func ReadConfig() (*Config, error) {

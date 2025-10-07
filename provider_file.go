@@ -13,24 +13,19 @@ func (f *FileConfig) Name() string {
 	return "local file"
 }
 
-func (f *FileConfig) NowPlaying(_ NowPlaying) {
-
+func (f *FileConfig) NowPlaying(_ NowPlaying) error {
+	return nil
 }
 
-func (f *FileConfig) Scrobble(n NowPlaying) {
+func (f *FileConfig) Scrobble(n NowPlaying) error {
 	if f == nil {
-		return
+		return nil
 	}
 
 	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
 	file, err := os.OpenFile(f.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		log.Error().
-			Str("provider", f.Name()).
-			Str("filename", f.Filename).
-			Err(err).
-			Msg("error opening file")
-		return
+		return err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
@@ -45,17 +40,6 @@ func (f *FileConfig) Scrobble(n NowPlaying) {
 		strconv.FormatInt(n.Timestamp, 10),
 	}, "|")
 
-	if _, err := fmt.Fprintf(file, "%s\n", line); err != nil {
-		log.Error().
-			Str("provider", f.Name()).
-			Str("filename", f.Filename).
-			Err(err).
-			Msg("error writing scrobble to file")
-		return
-	}
-
-	log.Info().
-		Str("provider", f.Name()).
-		Interface("status", n).
-		Msg("scrobbled")
+	_, err = fmt.Fprintf(file, "%s\n", line)
+	return err
 }

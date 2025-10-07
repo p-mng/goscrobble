@@ -91,16 +91,13 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				scrobbledPrevious[player] = false
 
 				for _, provider := range config.Providers() {
-					log.Debug().
-						Str("player", player).
-						Str("provider", provider.Name()).
-						Interface("status", status).
-						Msg("sending now playing info")
-					provider.NowPlaying(status)
+					updateNowPlaying(player, provider, status)
 				}
 
 				continue
 			}
+
+			status.Timestamp = previouslyPlaying[player].Timestamp
 
 			if status.Position < minPlayTime || status.PlaybackStatus != PlaybackPlaying || scrobbledPrevious[player] {
 				continue
@@ -119,8 +116,9 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 					Str("provider", provider.Name()).
 					Interface("status", status).
 					Msg("sending now playing and scrobble info")
-				provider.NowPlaying(previouslyPlaying[player])
-				provider.Scrobble(previouslyPlaying[player])
+
+				updateNowPlaying(player, provider, status)
+				sendScrobble(player, provider, status)
 			}
 		}
 
@@ -128,6 +126,50 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			Dur("duration", time.Duration(config.PollRate)).
 			Msg("waiting for next poll")
 		time.Sleep(time.Second * time.Duration(config.PollRate))
+	}
+}
+
+func updateNowPlaying(player string, provider Provider, status NowPlaying) {
+	log.Debug().
+		Str("player", player).
+		Str("provider", provider.Name()).
+		Interface("status", status).
+		Msg("updating now playing status")
+	if err := provider.NowPlaying(status); err != nil {
+		log.Error().
+			Str("player", player).
+			Str("provider", provider.Name()).
+			Interface("status", status).
+			Err(err).
+			Msg("error updating now playing status")
+	} else {
+		log.Debug().
+			Str("player", player).
+			Str("provider", provider.Name()).
+			Interface("status", status).
+			Msg("updated now playing status")
+	}
+}
+
+func sendScrobble(player string, provider Provider, status NowPlaying) {
+	log.Debug().
+		Str("player", player).
+		Str("provider", provider.Name()).
+		Interface("status", status).
+		Msg("saving scrobble")
+	if err := provider.Scrobble(status); err != nil {
+		log.Error().
+			Str("player", player).
+			Str("provider", provider.Name()).
+			Interface("status", status).
+			Err(err).
+			Msg("error saving scrobble")
+	} else {
+		log.Info().
+			Str("player", player).
+			Str("provider", provider.Name()).
+			Interface("status", status).
+			Msg("saved scrobble")
 	}
 }
 
