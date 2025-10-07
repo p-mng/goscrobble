@@ -1,9 +1,9 @@
 name: Lint and build binary
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "dev"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "dev"]
 jobs:
   golangci:
     runs-on: ubuntu-latest
