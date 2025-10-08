@@ -15,6 +15,8 @@ type Config struct {
 	MinPlaybackPercent  int64        `toml:"min_playback_percent" comment:"minimum playback percentage"`
 	Blacklist           []string     `toml:"blacklist" comment:"MPRIS player blacklist"`
 	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
+	NotifyOnScrobble    bool         `toml:"notify_on_scrobble" comment:"send a desktop notification when a scrobble is saved"`
+	NotifyOnError       bool         `toml:"notify_on_error" comment:"send a desktop notification when a scrobble cannot be saved"`
 
 	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`
 	File   *FileConfig   `toml:"file" comment:"local file configuration"`
@@ -124,6 +126,10 @@ func ReadConfig() (*Config, error) {
 	}
 	if config.MinPlaybackPercent <= 0 || config.MinPlaybackPercent > 100 {
 		config.MinPlaybackPercent = 50
+	}
+
+	if !config.NotifyOnError {
+		log.Warn().Msg("goscrobble will not send desktop notifications on failed scrobbles")
 	}
 
 	if config.LastFm == nil && config.File == nil {

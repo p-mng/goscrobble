@@ -36,7 +36,7 @@ func (f *FileConfig) Scrobble(n NowPlaying) error {
 	line := strings.Join([]string{
 		n.Track,
 		n.Album,
-		strings.Join(n.Artists, ", "),
+		n.JoinArtists(),
 		strconv.FormatInt(n.Timestamp, 10),
 	}, "|")
 

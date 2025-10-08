@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/shkh/lastfm-go/lastfm"
@@ -32,7 +31,7 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) error {
 
 	// https://www.last.fm/api/show/track.updateNowPlaying
 	_, err := lastFm.Track.UpdateNowPlaying(lastfm.P{
-		"artist":   strings.Join(n.Artists, ", "),
+		"artist":   n.JoinArtists(),
 		"track":    n.Track,
 		"album":    n.Album,
 		"duration": n.Duration,
@@ -55,7 +54,7 @@ func (l *LastFmConfig) Scrobble(n NowPlaying) error {
 
 	// https://www.last.fm/api/show/track.scrobble
 	_, err := lastFm.Track.Scrobble(lastfm.P{
-		"artist":    strings.Join(n.Artists, ", "),
+		"artist":    n.JoinArtists(),
 		"track":     n.Track,
 		"album":     n.Album,
 		"duration":  max(n.Duration, 30),

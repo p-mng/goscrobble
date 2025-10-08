@@ -9,6 +9,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var nowPlayingNotificationID uint32
+
+const (
+	RuneBeamedSixteenthNotes = '\u266C'
+	RuneCheckMark            = '\u2713'
+)
+
 func RunMainLoop(conn *dbus.Conn, config *Config) {
 	log.Debug().Msg("started main loop")
 
@@ -91,7 +98,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				scrobbledPrevious[player] = false
 
 				for _, provider := range config.Providers() {
-					updateNowPlaying(player, provider, status)
+					updateNowPlaying(player, provider, status, conn, config)
 				}
 
 				continue
@@ -117,8 +124,8 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 					Interface("status", status).
 					Msg("sending now playing and scrobble info")
 
-				updateNowPlaying(player, provider, status)
-				sendScrobble(player, provider, status)
+				updateNowPlaying(player, provider, status, conn, config)
+				sendScrobble(player, provider, status, conn, config)
 			}
 		}
 
@@ -129,7 +136,12 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 	}
 }
 
-func updateNowPlaying(player string, provider Provider, status NowPlaying) {
+func updateNowPlaying(player string,
+	provider Provider,
+	status NowPlaying,
+	conn *dbus.Conn,
+	config *Config,
+) {
 	log.Debug().
 		Str("player", player).
 		Str("provider", provider.Name()).
@@ -142,16 +154,41 @@ func updateNowPlaying(player string, provider Provider, status NowPlaying) {
 			Interface("status", status).
 			Err(err).
 			Msg("error updating now playing status")
+
+		if config.NotifyOnError {
+			notify(
+				conn,
+				IconSyncError,
+				"error updating now playing status",
+				fmt.Sprintf("error updating now playing status: %s", err.Error()),
+				false,
+			)
+		}
 	} else {
 		log.Debug().
 			Str("player", player).
 			Str("provider", provider.Name()).
 			Interface("status", status).
 			Msg("updated now playing status")
+
+		if config.NotifyOnScrobble {
+			notify(
+				conn,
+				IconSyncronizing,
+				fmt.Sprintf("%c now playing (%s)", RuneBeamedSixteenthNotes, provider.Name()),
+				fmt.Sprintf("now playing: %s - %s", status.JoinArtists(), status.Track),
+				true,
+			)
+		}
 	}
 }
 
-func sendScrobble(player string, provider Provider, status NowPlaying) {
+func sendScrobble(player string,
+	provider Provider,
+	status NowPlaying,
+	conn *dbus.Conn,
+	config *Config,
+) {
 	log.Debug().
 		Str("player", player).
 		Str("provider", provider.Name()).
@@ -164,12 +201,32 @@ func sendScrobble(player string, provider Provider, status NowPlaying) {
 			Interface("status", status).
 			Err(err).
 			Msg("error saving scrobble")
+
+		if config.NotifyOnError {
+			notify(
+				conn,
+				IconSyncError,
+				fmt.Sprintf("error saving scrobble (%s)", provider.Name()),
+				fmt.Sprintf("error saving scrobble: %s", err.Error()),
+				false,
+			)
+		}
 	} else {
 		log.Info().
 			Str("player", player).
 			Str("provider", provider.Name()).
 			Interface("status", status).
 			Msg("saved scrobble")
+
+		if config.NotifyOnScrobble {
+			notify(
+				conn,
+				IconSyncronizing,
+				fmt.Sprintf("%c saved scrobble (%s)", RuneCheckMark, provider.Name()),
+				fmt.Sprintf("saved scrobble: %s - %s", status.JoinArtists(), status.Track),
+				false,
+			)
+		}
 	}
 }
 
@@ -180,4 +237,28 @@ func minPlayTime(nowPlaying NowPlaying, config *Config) (int64, error) {
 
 	half := int64((float64(nowPlaying.Duration) / 100) * float64(config.MinPlaybackPercent))
 	return min(half, config.MinPlaybackDuration), nil
+}
+
+func notify(conn *dbus.Conn, appIcon, summary, body string, isNowPlaying bool) {
+	var replacesID uint32
+	if isNowPlaying {
+		replacesID = nowPlayingNotificationID
+	}
+
+	id, err := SendNotification(conn, replacesID, appIcon, summary, body)
+	if err != nil {
+		log.
+			Error().
+			Err(err).
+			Interface("notification", map[string]string{
+				"icon":    appIcon,
+				"summary": summary,
+				"text":    body},
+			).
+			Msg("error sending desktop notification via dbus")
+	}
+
+	if isNowPlaying {
+		nowPlayingNotificationID = id
+	}
 }

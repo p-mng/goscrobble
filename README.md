@@ -26,6 +26,10 @@ min_playback_duration = 240
 min_playback_percent = 50
 # MPRIS player blacklist
 blacklist = [ "chromium", "firefox" ]
+# send a desktop notification when a scrobble is saved
+notify_on_scrobble = false
+# send a desktop notification when a scrobble cannot be saved
+notify_on_error = true
 
 # regex match/replace
 [[regexes]]

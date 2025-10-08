@@ -29,6 +29,10 @@ type NowPlaying struct {
 	Position       int64
 }
 
+func (n NowPlaying) JoinArtists() string {
+	return strings.Join(n.Artists, ", ")
+}
+
 type ParsedRegexEntry struct {
 	Match   *regexp.Regexp
 	Replace string
@@ -49,7 +53,7 @@ func NowPlayingValid(n NowPlaying) bool {
 		return false
 	case n.Track == "":
 		return false
-	case strings.Join(n.Artists, ", ") == "":
+	case n.JoinArtists() == "":
 		return false
 	case n.Duration == 0:
 		return false
@@ -58,6 +62,8 @@ func NowPlayingValid(n NowPlaying) bool {
 	}
 }
 
+// https://dbus.freedesktop.org/doc/dbus-specification.html
+// https://specifications.freedesktop.org/mpris-spec/latest/
 func GetNowPlaying(
 	conn *dbus.Conn,
 	blacklist []*regexp.Regexp,
