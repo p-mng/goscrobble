@@ -16,10 +16,6 @@ func (f *FileConfig) NowPlaying(_ NowPlaying) error {
 }
 
 func (f *FileConfig) Scrobble(n NowPlaying) error {
-	if f == nil {
-		return nil
-	}
-
 	// https://pkg.go.dev/os#pkg-constants
 	file, err := os.OpenFile(f.Filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0600)
 	if err != nil {

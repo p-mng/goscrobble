@@ -15,10 +15,6 @@ func (c *CSVConfig) NowPlaying(_ NowPlaying) error {
 }
 
 func (c *CSVConfig) Scrobble(n NowPlaying) error {
-	if c == nil {
-		return nil
-	}
-
 	readExisting := true
 
 	file, err := os.Open(c.Filename)

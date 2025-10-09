@@ -16,10 +16,6 @@ func (l *LastFmConfig) Name() string {
 }
 
 func (l *LastFmConfig) NowPlaying(n NowPlaying) error {
-	if l == nil {
-		return nil
-	}
-
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
@@ -40,10 +36,6 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) error {
 }
 
 func (l *LastFmConfig) Scrobble(n NowPlaying) error {
-	if l == nil {
-		return nil
-	}
-
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
