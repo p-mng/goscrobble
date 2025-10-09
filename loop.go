@@ -131,7 +131,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				notify(
 					conn,
 					IconSyncronizing,
-					fmt.Sprintf("%c scrobbled: %s", RuneCheckMark, status.Track),
+					fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
 					uint32(0),
 				)
