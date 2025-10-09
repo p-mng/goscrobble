@@ -59,8 +59,7 @@ func (c Config) ParseRegexes() []ParsedRegexEntry {
 	for _, r := range c.Regexes {
 		match, err := regexp.Compile(r.Match)
 		if err != nil {
-			log.
-				Warn().
+			log.Warn().
 				Err(err).
 				Str("expression", r.Match).
 				Msg("error compiling match/repalce expression")

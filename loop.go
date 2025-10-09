@@ -247,8 +247,7 @@ func notify(conn *dbus.Conn, appIcon, summary, body string, isNowPlaying bool) {
 
 	id, err := SendNotification(conn, replacesID, appIcon, summary, body)
 	if err != nil {
-		log.
-			Error().
+		log.Error().
 			Err(err).
 			Interface("notification", map[string]string{
 				"icon":    appIcon,
