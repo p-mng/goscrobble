@@ -20,6 +20,7 @@ type Config struct {
 
 	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`
 	File   *FileConfig   `toml:"file" comment:"local file configuration"`
+	CSV    *CSVConfig    `toml:"csv" comment:"CSV file configuration"`
 }
 
 type RegexEntry struct {
@@ -40,6 +41,10 @@ type FileConfig struct {
 	Filename string `toml:"filename" comment:"file to write scrobbles to"`
 }
 
+type CSVConfig struct {
+	Filename string `toml:"filename" comment:"file to write scrobbles to"`
+}
+
 func (c Config) Providers() []Provider {
 	providers := make([]Provider, 0)
 
@@ -48,6 +53,9 @@ func (c Config) Providers() []Provider {
 	}
 	if c.File != nil {
 		providers = append(providers, c.File)
+	}
+	if c.CSV != nil {
+		providers = append(providers, c.CSV)
 	}
 
 	return providers

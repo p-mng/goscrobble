@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 func (f *FileConfig) Name() string {
@@ -22,16 +20,12 @@ func (f *FileConfig) Scrobble(n NowPlaying) error {
 		return nil
 	}
 
-	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
-	file, err := os.OpenFile(f.Filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	// https://pkg.go.dev/os#pkg-constants
+	file, err := os.OpenFile(f.Filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}
-	defer func(file *os.File) {
-		if err := file.Close(); err != nil {
-			log.Err(err).Msg("error closing scrobbles file")
-		}
-	}(file)
+	defer closeFileLogged(file)
 
 	line := strings.Join([]string{
 		n.Track,
