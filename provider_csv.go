@@ -50,6 +50,7 @@ func (c *CSVConfig) Scrobble(n NowPlaying) error {
 	if err != nil {
 		return err
 	}
+	defer closeFileLogged(newFile)
 
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }
