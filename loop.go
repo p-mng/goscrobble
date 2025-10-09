@@ -110,7 +110,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				}
 
 				for _, provider := range config.Providers() {
-					updateNowPlaying(player, provider, status, conn, config)
+					sendNowPlaying(player, provider, status, conn, config)
 				}
 
 				continue
@@ -151,7 +151,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 	}
 }
 
-func updateNowPlaying(player string,
+func sendNowPlaying(player string,
 	provider Provider,
 	status NowPlaying,
 	conn *dbus.Conn,
