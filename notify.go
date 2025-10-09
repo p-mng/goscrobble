@@ -1,6 +1,9 @@
 package main
 
-import "github.com/godbus/dbus/v5"
+import (
+	"github.com/godbus/dbus/v5"
+	"github.com/rs/zerolog/log"
+)
 
 // https://specifications.freedesktop.org/icon-naming-spec/latest/
 const (
@@ -22,10 +25,19 @@ func SendNotification(conn *dbus.Conn, replacesID uint32, appIcon, summary, body
 		int32(-1),
 	}
 
+	log.Debug().
+		Interface("notification", args).
+		Msg("sending desktop notification via dbus")
+
 	var id uint32
 	err := conn.
 		Object("org.freedesktop.Notifications", "/org/freedesktop/Notifications").
 		Call("org.freedesktop.Notifications.Notify", 0, args...).
 		Store(&id)
+
+	log.Debug().
+		Uint32("id", id).
+		Msg("sent desktop notification")
+
 	return id, err
 }

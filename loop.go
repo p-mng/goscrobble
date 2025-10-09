@@ -14,6 +14,8 @@ var nowPlayingNotificationID uint32
 const (
 	RuneBeamedSixteenthNotes = '\u266C'
 	RuneCheckMark            = '\u2713'
+	RuneEmDash               = '\u2014'
+	RuneWarningSign          = '\u26A0'
 )
 
 func RunMainLoop(conn *dbus.Conn, config *Config) {
@@ -86,16 +88,26 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			}
 
 			if !NowPlayingEquals(status, previouslyPlaying[player]) {
-				log.Info().
-					Str("player", player).
-					Interface("status", status).
-					Msg("started playback of new track")
-
 				status.Position = 0
 				status.Timestamp = time.Now().Unix()
 
 				previouslyPlaying[player] = status
 				scrobbledPrevious[player] = false
+
+				log.Info().
+					Str("player", player).
+					Interface("status", status).
+					Msg("started playback of new track")
+
+				if config.NotifyOnScrobble {
+					nowPlayingNotificationID = notify(
+						conn,
+						IconSyncronizing,
+						fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
+						fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
+						nowPlayingNotificationID,
+					)
+				}
 
 				for _, provider := range config.Providers() {
 					updateNowPlaying(player, provider, status, conn, config)
@@ -115,16 +127,19 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				Interface("status", status).
 				Msg("scrobbling track")
 
+			if config.NotifyOnScrobble {
+				notify(
+					conn,
+					IconSyncronizing,
+					fmt.Sprintf("%c scrobbled: %s", RuneCheckMark, status.Track),
+					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
+					uint32(0),
+				)
+			}
+
 			scrobbledPrevious[player] = true
 
 			for _, provider := range config.Providers() {
-				log.Debug().
-					Str("player", player).
-					Str("provider", provider.Name()).
-					Interface("status", status).
-					Msg("sending now playing and scrobble info")
-
-				updateNowPlaying(player, provider, status, conn, config)
 				sendScrobble(player, provider, status, conn, config)
 			}
 		}
@@ -159,9 +174,9 @@ func updateNowPlaying(player string,
 			notify(
 				conn,
 				IconSyncError,
-				"error updating now playing status",
-				fmt.Sprintf("error updating now playing status: %s", err.Error()),
-				false,
+				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, provider.Name()),
+				fmt.Sprintf("error updating now playing status: <b>%s</b>", err.Error()),
+				uint32(0),
 			)
 		}
 	} else {
@@ -170,16 +185,6 @@ func updateNowPlaying(player string,
 			Str("provider", provider.Name()).
 			Interface("status", status).
 			Msg("updated now playing status")
-
-		if config.NotifyOnScrobble {
-			notify(
-				conn,
-				IconSyncronizing,
-				fmt.Sprintf("%c now playing (%s)", RuneBeamedSixteenthNotes, provider.Name()),
-				fmt.Sprintf("now playing: %s - %s", status.JoinArtists(), status.Track),
-				true,
-			)
-		}
 	}
 }
 
@@ -206,9 +211,9 @@ func sendScrobble(player string,
 			notify(
 				conn,
 				IconSyncError,
-				fmt.Sprintf("error saving scrobble (%s)", provider.Name()),
-				fmt.Sprintf("error saving scrobble: %s", err.Error()),
-				false,
+				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, provider.Name()),
+				fmt.Sprintf("error saving scrobble: <b>%s</b>", err.Error()),
+				uint32(0),
 			)
 		}
 	} else {
@@ -217,16 +222,6 @@ func sendScrobble(player string,
 			Str("provider", provider.Name()).
 			Interface("status", status).
 			Msg("saved scrobble")
-
-		if config.NotifyOnScrobble {
-			notify(
-				conn,
-				IconSyncronizing,
-				fmt.Sprintf("%c saved scrobble (%s)", RuneCheckMark, provider.Name()),
-				fmt.Sprintf("saved scrobble: %s - %s", status.JoinArtists(), status.Track),
-				false,
-			)
-		}
 	}
 }
 
@@ -239,12 +234,7 @@ func minPlayTime(nowPlaying NowPlaying, config *Config) (int64, error) {
 	return min(half, config.MinPlaybackDuration), nil
 }
 
-func notify(conn *dbus.Conn, appIcon, summary, body string, isNowPlaying bool) {
-	var replacesID uint32
-	if isNowPlaying {
-		replacesID = nowPlayingNotificationID
-	}
-
+func notify(conn *dbus.Conn, appIcon, summary, body string, replacesID uint32) uint32 {
 	id, err := SendNotification(conn, replacesID, appIcon, summary, body)
 	if err != nil {
 		log.Error().
@@ -255,9 +245,7 @@ func notify(conn *dbus.Conn, appIcon, summary, body string, isNowPlaying bool) {
 				"text":    body},
 			).
 			Msg("error sending desktop notification via dbus")
+		return replacesID
 	}
-
-	if isNowPlaying {
-		nowPlayingNotificationID = id
-	}
+	return id
 }
