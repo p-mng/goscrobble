@@ -48,16 +48,20 @@ track = true
 [lastfm]
 key = "<API key>"
 secret = "<shared secret>"
-session_key = "<session key (automatically generated using goscrobble auth)>"
+session_key = "<session key (automatically generated using `goscrobble auth`)>"
 
-# local file configuration
-[file]
+# local file configuration (deprecated, use csv instead)
+# [file]
+# filename = "<file to write scrobbles to>"
+
+# local CSV file configuration
+[csv]
 filename = "<file to write scrobbles to>"
 ```
 
 You can blacklist one or multiple players using [regular expressions](https://gobyexample.com/regular-expressions). The example above will block both `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84`.
 
-If you don't want to use one of the two supported providers (`lastfm` or `file`), just remove the section from the config file.
+If you don't want to use one of the supported providers, just remove the section from the config file.
 
 ## Installation
 
