@@ -93,7 +93,8 @@ func ReadConfig() (*Config, error) {
 	}
 
 	fileName := fmt.Sprintf("%s/config.toml", configDir)
-	//nolint:gosec // goscrobble runs as the user who owns the config, so this is not an issue
+
+	//nolint:gosec
 	data, err := os.ReadFile(fileName)
 	if os.IsNotExist(err) {
 		defaultConfig := Config{
