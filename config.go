@@ -102,8 +102,12 @@ func ReadConfig() (*Config, error) {
 			MinPlaybackDuration: 4 * 60,
 			MinPlaybackPercent:  50,
 			Blacklist:           []string{},
+			Regexes:             []RegexEntry{},
+			NotifyOnScrobble:    false,
+			NotifyOnError:       true,
 			LastFm:              nil,
 			File:                nil,
+			CSV:                 nil,
 		}
 		defaultMarshalled, err := toml.Marshal(defaultConfig)
 		if err != nil {

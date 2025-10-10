@@ -2,6 +2,8 @@ version: "2"
 linters:
   # https://golangci-lint.run/usage/linters/#enabled-by-default
   enable:
+    - exhaustive
+    - exhaustruct
     - goconst
     - gocritic
     - gosec
@@ -10,3 +12,9 @@ linters:
   exclusions:
     presets:
       - comments
+  settings:
+    exhaustruct:
+      exclude:
+        - 'github.com\/rs\/zerolog\..*'
+        - 'github.com\/urfave\/cli\/v3\..*'
+      allow-empty: true

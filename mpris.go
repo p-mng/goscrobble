@@ -140,6 +140,7 @@ func GetNowPlaying(
 			Track:          *track,
 			Album:          *album,
 			Duration:       *duration / 1_000_000,
+			Timestamp:      0,
 			PlaybackStatus: *playbackStatus,
 			Position:       *position / 1_000_000,
 		}
