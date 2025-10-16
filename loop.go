@@ -47,6 +47,11 @@ func RunMainLoop(config *Config) {
 	log.Debug().Msg("parsed match/replace expressions")
 
 	for {
+		log.Debug().
+			Dur("duration", time.Duration(config.PollRate)).
+			Msg("waiting for next poll")
+		time.Sleep(time.Second * time.Duration(config.PollRate))
+
 		playbackInfo, err := playback.GetInfo(playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
@@ -140,11 +145,6 @@ func RunMainLoop(config *Config) {
 				sendScrobble(player, provider, status, config)
 			}
 		}
-
-		log.Debug().
-			Dur("duration", time.Duration(config.PollRate)).
-			Msg("waiting for next poll")
-		time.Sleep(time.Second * time.Duration(config.PollRate))
 	}
 }
 
