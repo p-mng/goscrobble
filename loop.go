@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/godbus/dbus/v5"
 	"github.com/p-mng/goscrobble/notify"
 	np "github.com/p-mng/goscrobble/nowplaying"
 	"github.com/rs/zerolog/log"
@@ -20,7 +19,7 @@ const (
 	RuneWarningSign          = '\u26A0'
 )
 
-func RunMainLoop(conn *dbus.Conn, config *Config) {
+func RunMainLoop(config *Config) {
 	log.Debug().Msg("started main loop")
 
 	previouslyPlaying := map[string]np.NowPlayingInfo{}
@@ -48,7 +47,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 	log.Debug().Msg("parsed match/replace expressions")
 
 	for {
-		nowPlaying, err := np.GetNowPlaying(conn, playerBlacklist, parsedRegexes)
+		nowPlaying, err := np.GetNowPlaying(playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue
@@ -103,8 +102,6 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 
 				if config.NotifyOnScrobble {
 					nowPlayingNotificationID = sendNotification(
-						conn,
-						notify.IconSyncronizing,
 						fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
 						fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
 						nowPlayingNotificationID,
@@ -112,7 +109,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				}
 
 				for _, provider := range config.Providers() {
-					sendNowPlaying(player, provider, status, conn, config)
+					sendNowPlaying(player, provider, status, config)
 				}
 
 				continue
@@ -131,8 +128,6 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 
 			if config.NotifyOnScrobble {
 				sendNotification(
-					conn,
-					notify.IconSyncronizing,
 					fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
 					uint32(0),
@@ -142,7 +137,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 			scrobbledPrevious[player] = true
 
 			for _, provider := range config.Providers() {
-				sendScrobble(player, provider, status, conn, config)
+				sendScrobble(player, provider, status, config)
 			}
 		}
 
@@ -156,7 +151,6 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 func sendNowPlaying(player string,
 	provider Provider,
 	status np.NowPlayingInfo,
-	conn *dbus.Conn,
 	config *Config,
 ) {
 	log.Debug().
@@ -174,8 +168,6 @@ func sendNowPlaying(player string,
 
 		if config.NotifyOnError {
 			sendNotification(
-				conn,
-				notify.IconSyncError,
 				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, provider.Name()),
 				fmt.Sprintf("error updating now playing status: <b>%s</b>", err.Error()),
 				uint32(0),
@@ -193,7 +185,6 @@ func sendNowPlaying(player string,
 func sendScrobble(player string,
 	provider Provider,
 	status np.NowPlayingInfo,
-	conn *dbus.Conn,
 	config *Config,
 ) {
 	log.Debug().
@@ -211,8 +202,6 @@ func sendScrobble(player string,
 
 		if config.NotifyOnError {
 			sendNotification(
-				conn,
-				notify.IconSyncError,
 				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, provider.Name()),
 				fmt.Sprintf("error saving scrobble: <b>%s</b>", err.Error()),
 				uint32(0),
@@ -236,13 +225,12 @@ func minPlayTime(nowPlaying np.NowPlayingInfo, config *Config) (int64, error) {
 	return min(half, config.MinPlaybackDuration), nil
 }
 
-func sendNotification(conn *dbus.Conn, appIcon, summary, body string, replacesID uint32) uint32 {
-	id, err := notify.SendNotification(conn, replacesID, appIcon, summary, body)
+func sendNotification(summary, body string, replacesID uint32) uint32 {
+	id, err := notify.SendNotification(replacesID, summary, body)
 	if err != nil {
 		log.Error().
 			Err(err).
 			Interface("notification", map[string]string{
-				"icon":    appIcon,
 				"summary": summary,
 				"text":    body},
 			).

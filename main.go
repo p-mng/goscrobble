@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/godbus/dbus/v5"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/shkh/lastfm-go/lastfm"
@@ -55,17 +54,6 @@ func main() {
 func cmdRun(_ context.Context, cmd *cli.Command) error {
 	setupLogger(cmd)
 
-	conn, err := dbus.ConnectSessionBus()
-	if err != nil {
-		log.Info().Err(err).Msg("failed to connect to session bus")
-		os.Exit(1)
-	}
-	defer func(conn *dbus.Conn) {
-		if err := conn.Close(); err != nil {
-			log.Warn().Err(err).Msg("error closing dbus connection")
-		}
-	}(conn)
-
 	config, err := ReadConfig()
 	if err != nil {
 		log.Error().Err(err).Msg("error reading config file")
@@ -73,7 +61,7 @@ func cmdRun(_ context.Context, cmd *cli.Command) error {
 	}
 	log.Debug().Any("config", config).Msg("parsed config")
 
-	RunMainLoop(conn, config)
+	RunMainLoop(config)
 
 	return nil
 }
@@ -102,7 +90,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	authURL := api.GetAuthTokenUrl(token)
 
-	//nolint:gosec // authURL comes from shkh/lastfm-go and cannot be set by an attacker
+	//nolint:gosec
 	openBrowserCmd := exec.Command("/usr/bin/env", "xdg-open", authURL)
 	if err := openBrowserCmd.Run(); err != nil {
 		log.Warn().Err(err).Msg("failed to open auth URL in web browser")

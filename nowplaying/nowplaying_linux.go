@@ -7,16 +7,24 @@ import (
 	"strings"
 
 	"github.com/godbus/dbus/v5"
+	"github.com/p-mng/goscrobble/close"
 	"github.com/rs/zerolog/log"
 )
 
+// This function expects a context value `conn` of type `*dbus.Conn`.
+//
 // https://dbus.freedesktop.org/doc/dbus-specification.html
 // https://specifications.freedesktop.org/mpris-spec/latest/
 func GetNowPlaying(
-	conn *dbus.Conn,
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexEntry,
 ) (map[string]NowPlayingInfo, error) {
+	conn, err := dbus.ConnectSessionBus()
+	if err != nil {
+		return nil, err
+	}
+	defer close.DBus(conn)
+
 	var dbusNames []string
 	if err := conn.
 		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
@@ -61,29 +69,7 @@ func GetNowPlaying(
 			continue
 		}
 
-		for _, r := range regexes {
-			log.Debug().
-				Str("expression", r.Match.String()).
-				Str("replacement", r.Replace).
-				Msg("running match/replace substitution")
-
-			if r.Artist {
-				var newArtists []string
-				for _, artist := range *artists {
-					newArtist := r.Match.ReplaceAllString(artist, r.Replace)
-					newArtists = append(newArtists, newArtist)
-				}
-				*artists = newArtists
-			}
-			if r.Track {
-				*track = r.Match.ReplaceAllString(*track, r.Replace)
-			}
-			if r.Album {
-				*album = r.Match.ReplaceAllString(*album, r.Replace)
-			}
-		}
-
-		info[player] = NowPlayingInfo{
+		nowPlayingInfo :=  NowPlayingInfo{
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,
@@ -92,6 +78,10 @@ func GetNowPlaying(
 			PlaybackStatus: *playbackStatus,
 			Position:       *position / 1_000_000,
 		}
+
+		nowPlayingInfo.RegexReplace(regexes)
+
+		info[player] = nowPlayingInfo
 	}
 
 	return info, nil
@@ -119,13 +109,4 @@ func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error
 		return &parsedValue, nil
 	}
 	return nil, fmt.Errorf("invalid data type for map entry %s", key)
-}
-
-func isBlacklisted(blacklist []*regexp.Regexp, player string) bool {
-	for _, re := range blacklist {
-		if re.MatchString(player) {
-			return true
-		}
-	}
-	return false
 }

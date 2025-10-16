@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/csv"
-	np "github.com/p-mng/goscrobble/nowplaying"
 	"os"
 	"strconv"
+
+	"github.com/p-mng/goscrobble/close"
+	np "github.com/p-mng/goscrobble/nowplaying"
 )
 
 func (c *CSVConfig) Name() string {
@@ -28,7 +30,7 @@ func (c *CSVConfig) Scrobble(n np.NowPlayingInfo) error {
 	var scrobbles [][]string
 
 	if readExisting {
-		defer closeFileLogged(file)
+		defer close.File(file)
 
 		readScrobbles, err := csv.NewReader(file).ReadAll()
 		if err != nil {
@@ -51,7 +53,7 @@ func (c *CSVConfig) Scrobble(n np.NowPlayingInfo) error {
 	if err != nil {
 		return err
 	}
-	defer closeFileLogged(newFile)
+	defer close.File(newFile)
 
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }

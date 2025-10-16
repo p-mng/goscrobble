@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Enum:Playback_Status
@@ -57,3 +59,35 @@ func (n NowPlayingInfo) Valid() bool {
 	}
 }
 
+func (n *NowPlayingInfo) RegexReplace(regexes []ParsedRegexEntry) {
+	for _, r := range regexes {
+		log.Debug().
+			Str("expression", r.Match.String()).
+			Str("replacement", r.Replace).
+			Msg("running match/replace substitution")
+
+		if r.Artist {
+			var newArtists []string
+			for _, artist := range n.Artists {
+				newArtist := r.Match.ReplaceAllString(artist, r.Replace)
+				newArtists = append(newArtists, newArtist)
+			}
+			n.Artists = newArtists
+		}
+		if r.Track {
+			n.Track = r.Match.ReplaceAllString(n.Track, r.Replace)
+		}
+		if r.Album {
+			n.Album = r.Match.ReplaceAllString(n.Album, r.Replace)
+		}
+	}
+}
+
+func isBlacklisted(blacklist []*regexp.Regexp, player string) bool {
+	for _, re := range blacklist {
+		if re.MatchString(player) {
+			return true
+		}
+	}
+	return false
+}

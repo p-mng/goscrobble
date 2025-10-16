@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	np "github.com/p-mng/goscrobble/nowplaying"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/p-mng/goscrobble/close"
+	np "github.com/p-mng/goscrobble/nowplaying"
 )
 
 func (f *FileConfig) Name() string {
@@ -22,7 +24,7 @@ func (f *FileConfig) Scrobble(n np.NowPlayingInfo) error {
 	if err != nil {
 		return err
 	}
-	defer closeFileLogged(file)
+	defer close.File(file)
 
 	line := strings.Join([]string{
 		n.Track,
