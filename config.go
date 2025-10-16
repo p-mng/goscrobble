@@ -14,10 +14,10 @@ type Config struct {
 	PollRate            int          `toml:"poll_rate" comment:"track position update frequency in seconds"`
 	MinPlaybackDuration int64        `toml:"min_playback_duration" comment:"minimum playback duration in seconds"`
 	MinPlaybackPercent  int64        `toml:"min_playback_percent" comment:"minimum playback percentage"`
-	Blacklist           []string     `toml:"blacklist" comment:"MPRIS player blacklist"`
-	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
 	NotifyOnScrobble    bool         `toml:"notify_on_scrobble" comment:"send a desktop notification when a scrobble is saved"`
 	NotifyOnError       bool         `toml:"notify_on_error" comment:"send a desktop notification when a scrobble cannot be saved"`
+	Blacklist           []string     `toml:"blacklist" comment:"MPRIS player blacklist"`
+	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
 
 	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`
 	File   *FileConfig   `toml:"file" comment:"local file configuration"`
