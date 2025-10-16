@@ -6,18 +6,18 @@ import (
 	"strconv"
 
 	"github.com/p-mng/goscrobble/close"
-	np "github.com/p-mng/goscrobble/nowplaying"
+	"github.com/p-mng/goscrobble/playback"
 )
 
 func (c *CSVConfig) Name() string {
 	return "local CSV file"
 }
 
-func (c *CSVConfig) NowPlaying(_ np.NowPlayingInfo) error {
+func (c *CSVConfig) NowPlaying(_ playback.Info) error {
 	return nil
 }
 
-func (c *CSVConfig) Scrobble(n np.NowPlayingInfo) error {
+func (c *CSVConfig) Scrobble(n playback.Info) error {
 	readExisting := true
 
 	file, err := os.Open(c.Filename)

@@ -1,4 +1,4 @@
-package nowplaying
+package playback
 
 import (
 	"errors"
@@ -11,14 +11,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// This function expects a context value `conn` of type `*dbus.Conn`.
-//
 // https://dbus.freedesktop.org/doc/dbus-specification.html
 // https://specifications.freedesktop.org/mpris-spec/latest/
-func GetNowPlaying(
+func GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexEntry,
-) (map[string]NowPlayingInfo, error) {
+) (map[string]Info, error) {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		return nil, err
@@ -40,7 +38,7 @@ func GetNowPlaying(
 		}
 	}
 
-	info := map[string]NowPlayingInfo{}
+	playerPlaybackInfo := map[string]Info{}
 
 	for _, player := range playerNames {
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
@@ -69,7 +67,7 @@ func GetNowPlaying(
 			continue
 		}
 
-		nowPlayingInfo :=  NowPlayingInfo{
+		playbackInfo :=  Info{
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,
@@ -79,12 +77,12 @@ func GetNowPlaying(
 			Position:       *position / 1_000_000,
 		}
 
-		nowPlayingInfo.RegexReplace(regexes)
+		playbackInfo.RegexReplace(regexes)
 
-		info[player] = nowPlayingInfo
+		playerPlaybackInfo[player] = playbackInfo
 	}
 
-	return info, nil
+	return playerPlaybackInfo, nil
 }
 
 func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {

@@ -1,4 +1,4 @@
-package nowplaying
+package playback
 
 import (
 	"encoding/json"
@@ -27,10 +27,10 @@ type mediaControlInfo struct {
 
 // https://github.com/ungive/media-control
 // https://github.com/ungive/mediaremote-adapter
-func GetNowPlaying(
+func GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexEntry,
-) (map[string]NowPlayingInfo, error) {
+) (map[string]Info, error) {
 	log.Debug().Msg("getting media metadata using `media-control`")
 
 	cmd := exec.Command("/usr/bin/env", "media-control", "get")
@@ -39,29 +39,29 @@ func GetNowPlaying(
 		return nil, err
 	}
 
-	var info mediaControlInfo
-	if err := json.Unmarshal(output, &info); err != nil {
+	var outputParsed mediaControlInfo
+	if err := json.Unmarshal(output, &outputParsed); err != nil {
 		return nil, err
 	}
 
-	if isBlacklisted(playerBlacklist, info.BundleIdentifier) {
-		return map[string]NowPlayingInfo{}, nil
+	if isBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
+		return map[string]Info{}, nil
 	}
 
-	nowPlaying := NowPlayingInfo{
-		Artists:        []string{info.Artist},
-		Track:          info.Title,
-		Album:          info.Album,
-		Duration:       int64(info.Duration),
-		Timestamp:      info.Timestamp.Unix(),
-		PlaybackStatus: playbackStatus(info.Playing),
-		Position:       int64(info.ElapsedTime),
+	playbackInfo := Info{
+		Artists:        []string{outputParsed.Artist},
+		Track:          outputParsed.Title,
+		Album:          outputParsed.Album,
+		Duration:       int64(outputParsed.Duration),
+		Timestamp:      outputParsed.Timestamp.Unix(),
+		PlaybackStatus: playbackStatus(outputParsed.Playing),
+		Position:       int64(outputParsed.ElapsedTime),
 	}
 
-	nowPlaying.RegexReplace(regexes)
+	playbackInfo.RegexReplace(regexes)
 
-	return map[string]NowPlayingInfo{
-		info.BundleIdentifier: nowPlaying,
+	return map[string]Info{
+		outputParsed.BundleIdentifier: playbackInfo,
 	}, nil
 }
 

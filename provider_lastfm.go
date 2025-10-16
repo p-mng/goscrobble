@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 
-	np "github.com/p-mng/goscrobble/nowplaying"
+	"github.com/p-mng/goscrobble/playback"
 	"github.com/rs/zerolog/log"
 	"github.com/shkh/lastfm-go/lastfm"
 )
@@ -16,7 +16,7 @@ func (l *LastFmConfig) Name() string {
 	return "last.fm"
 }
 
-func (l *LastFmConfig) NowPlaying(n np.NowPlayingInfo) error {
+func (l *LastFmConfig) NowPlaying(n playback.Info) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
@@ -36,7 +36,7 @@ func (l *LastFmConfig) NowPlaying(n np.NowPlayingInfo) error {
 	return err
 }
 
-func (l *LastFmConfig) Scrobble(n np.NowPlayingInfo) error {
+func (l *LastFmConfig) Scrobble(n playback.Info) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}

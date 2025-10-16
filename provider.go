@@ -1,9 +1,9 @@
 package main
 
-import np "github.com/p-mng/goscrobble/nowplaying"
+import "github.com/p-mng/goscrobble/playback"
 
 type Provider interface {
 	Name() string
-	NowPlaying(np.NowPlayingInfo) error
-	Scrobble(np.NowPlayingInfo) error
+	NowPlaying(playback.Info) error
+	Scrobble(playback.Info) error
 }

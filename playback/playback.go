@@ -1,4 +1,4 @@
-package nowplaying
+package playback
 
 import (
 	"reflect"
@@ -15,7 +15,7 @@ const (
 	PlaybackStopped = "Stopped"
 )
 
-type NowPlayingInfo struct {
+type Info struct {
 	Artists   []string
 	Track     string
 	Album     string
@@ -26,8 +26,8 @@ type NowPlayingInfo struct {
 	Position       int64
 }
 
-func (n NowPlayingInfo) JoinArtists() string {
-	return strings.Join(n.Artists, ", ")
+func (p Info) JoinArtists() string {
+	return strings.Join(p.Artists, ", ")
 }
 
 type ParsedRegexEntry struct {
@@ -38,28 +38,28 @@ type ParsedRegexEntry struct {
 	Album   bool
 }
 
-func (n NowPlayingInfo) Equals(other NowPlayingInfo) bool {
-	return reflect.DeepEqual(n.Artists, other.Artists) &&
-		n.Track == other.Track &&
-		n.Album == other.Album
+func (p Info) Equals(other Info) bool {
+	return reflect.DeepEqual(p.Artists, other.Artists) &&
+		p.Track == other.Track &&
+		p.Album == other.Album
 }
 
-func (n NowPlayingInfo) Valid() bool {
+func (p Info) Valid() bool {
 	switch {
-	case n.Album == "":
+	case p.Album == "":
 		return false
-	case n.Track == "":
+	case p.Track == "":
 		return false
-	case n.JoinArtists() == "":
+	case p.JoinArtists() == "":
 		return false
-	case n.Duration == 0:
+	case p.Duration == 0:
 		return false
 	default:
 		return true
 	}
 }
 
-func (n *NowPlayingInfo) RegexReplace(regexes []ParsedRegexEntry) {
+func (p *Info) RegexReplace(regexes []ParsedRegexEntry) {
 	for _, r := range regexes {
 		log.Debug().
 			Str("expression", r.Match.String()).
@@ -68,17 +68,17 @@ func (n *NowPlayingInfo) RegexReplace(regexes []ParsedRegexEntry) {
 
 		if r.Artist {
 			var newArtists []string
-			for _, artist := range n.Artists {
+			for _, artist := range p.Artists {
 				newArtist := r.Match.ReplaceAllString(artist, r.Replace)
 				newArtists = append(newArtists, newArtist)
 			}
-			n.Artists = newArtists
+			p.Artists = newArtists
 		}
 		if r.Track {
-			n.Track = r.Match.ReplaceAllString(n.Track, r.Replace)
+			p.Track = r.Match.ReplaceAllString(p.Track, r.Replace)
 		}
 		if r.Album {
-			n.Album = r.Match.ReplaceAllString(n.Album, r.Replace)
+			p.Album = r.Match.ReplaceAllString(p.Album, r.Replace)
 		}
 	}
 }

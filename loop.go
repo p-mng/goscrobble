@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/p-mng/goscrobble/notify"
-	np "github.com/p-mng/goscrobble/nowplaying"
+	"github.com/p-mng/goscrobble/playback"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,7 +22,7 @@ const (
 func RunMainLoop(config *Config) {
 	log.Debug().Msg("started main loop")
 
-	previouslyPlaying := map[string]np.NowPlayingInfo{}
+	previouslyPlaying := map[string]playback.Info{}
 	scrobbledPrevious := map[string]bool{}
 
 	var playerBlacklist []*regexp.Regexp
@@ -47,24 +47,24 @@ func RunMainLoop(config *Config) {
 	log.Debug().Msg("parsed match/replace expressions")
 
 	for {
-		nowPlaying, err := np.GetNowPlaying(playerBlacklist, parsedRegexes)
+		playbackInfo, err := playback.GetInfo(playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue
 		}
 
-		for player := range nowPlaying {
+		for player := range playbackInfo {
 			if _, ok := previouslyPlaying[player]; !ok {
 				log.Info().
 					Str("player", player).
 					Msg("new player found")
-				previouslyPlaying[player] = np.NowPlayingInfo{}
+				previouslyPlaying[player] = playback.Info{}
 				scrobbledPrevious[player] = false
 			}
 		}
 
 		for player := range previouslyPlaying {
-			if _, ok := nowPlaying[player]; !ok {
+			if _, ok := playbackInfo[player]; !ok {
 				log.Info().
 					Str("player", player).
 					Msg("player disappeared")
@@ -73,7 +73,7 @@ func RunMainLoop(config *Config) {
 			}
 		}
 
-		for player, status := range nowPlaying {
+		for player, status := range playbackInfo {
 			if !status.Valid() {
 				continue
 			}
@@ -117,7 +117,7 @@ func RunMainLoop(config *Config) {
 
 			status.Timestamp = previouslyPlaying[player].Timestamp
 
-			if status.Position < minPlayTime || status.PlaybackStatus != np.PlaybackPlaying || scrobbledPrevious[player] {
+			if status.Position < minPlayTime || status.PlaybackStatus != playback.PlaybackPlaying || scrobbledPrevious[player] {
 				continue
 			}
 
@@ -150,7 +150,7 @@ func RunMainLoop(config *Config) {
 
 func sendNowPlaying(player string,
 	provider Provider,
-	status np.NowPlayingInfo,
+	status playback.Info,
 	config *Config,
 ) {
 	log.Debug().
@@ -184,7 +184,7 @@ func sendNowPlaying(player string,
 
 func sendScrobble(player string,
 	provider Provider,
-	status np.NowPlayingInfo,
+	status playback.Info,
 	config *Config,
 ) {
 	log.Debug().
@@ -216,12 +216,12 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(nowPlaying np.NowPlayingInfo, config *Config) (int64, error) {
-	if nowPlaying.Duration < 0 {
-		return 0, fmt.Errorf("invalid track length: %d", nowPlaying.Duration)
+func minPlayTime(playbackInfo playback.Info, config *Config) (int64, error) {
+	if playbackInfo.Duration < 0 {
+		return 0, fmt.Errorf("invalid track length: %d", playbackInfo.Duration)
 	}
 
-	half := int64((float64(nowPlaying.Duration) / 100) * float64(config.MinPlaybackPercent))
+	half := int64((float64(playbackInfo.Duration) / 100) * float64(config.MinPlaybackPercent))
 	return min(half, config.MinPlaybackDuration), nil
 }
 
