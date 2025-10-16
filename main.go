@@ -142,13 +142,15 @@ func setupLogger(cmd *cli.Command) {
 
 	log.Logger = log.With().Caller().Logger()
 
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 
-	log.Logger = log.Output(os.Stderr)
-	if !json {
+	if json {
+		log.Logger = log.Output(os.Stderr)
+	} else {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
 }
