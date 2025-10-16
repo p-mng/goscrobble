@@ -31,7 +31,7 @@ func GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexEntry,
 ) (map[string]Info, error) {
-	log.Debug().Msg("getting media metadata using `media-control`")
+	log.Debug().Msg("getting playback metadata using media-control")
 
 	cmd := exec.Command("/usr/bin/env", "media-control", "get")
 	output, err := cmd.Output()
@@ -42,6 +42,11 @@ func GetInfo(
 	var outputParsed mediaControlInfo
 	if err := json.Unmarshal(output, &outputParsed); err != nil {
 		return nil, err
+	}
+
+	if outputParsed == (mediaControlInfo{}) {
+		log.Debug().Msg("media-control did not find any active players")
+		return map[string]Info{}, nil
 	}
 
 	if isBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
