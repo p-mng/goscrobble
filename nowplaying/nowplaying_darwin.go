@@ -34,10 +34,6 @@ func GetNowPlaying(
 	log.Debug().Msg("getting media metadata using `media-control`")
 
 	cmd := exec.Command("/usr/bin/env", "media-control", "get")
-	if err := cmd.Run(); err != nil {
-		return nil, err
-	}
-
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
