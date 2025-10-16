@@ -16,7 +16,7 @@ type Config struct {
 	MinPlaybackPercent  int64        `toml:"min_playback_percent" comment:"minimum playback percentage"`
 	NotifyOnScrobble    bool         `toml:"notify_on_scrobble" comment:"send a desktop notification when a scrobble is saved"`
 	NotifyOnError       bool         `toml:"notify_on_error" comment:"send a desktop notification when a scrobble cannot be saved"`
-	Blacklist           []string     `toml:"blacklist" comment:"MPRIS player blacklist"`
+	Blacklist           []string     `toml:"blacklist" comment:"player blacklist"`
 	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
 
 	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`

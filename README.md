@@ -4,7 +4,7 @@
 
 ## Description
 
-`goscrobble` is a simple music scrobbler daemon for MPRIS-based music players (e.g. [Spotify](https://www.spotify.com/en/download/linux/) or [tidal-hifi](https://github.com/Mastermindzh/tidal-hifi)).
+`goscrobble` is a simple, cross-platform music scrobbler daemon using [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/)/[D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) on Linux and [ungive/media-control](https://github.com/ungive/media-control) on macOS.
 
 ## Features
 
@@ -24,12 +24,12 @@ poll_rate = 2
 min_playback_duration = 240
 # minimum playback percentage
 min_playback_percent = 50
-# MPRIS player blacklist
-blacklist = [ "chromium", "firefox" ]
 # send a desktop notification when a scrobble is saved
 notify_on_scrobble = false
 # send a desktop notification when a scrobble cannot be saved
 notify_on_error = true
+# player blacklist
+blacklist = ["chromium", "firefox"]
 
 # regex match/replace
 [[regexes]]
@@ -59,32 +59,50 @@ session_key = "<session key (automatically generated using `goscrobble auth`)>"
 filename = "<file to write scrobbles to>"
 ```
 
-You can blacklist one or multiple players using [regular expressions](https://gobyexample.com/regular-expressions). The example above will block both `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84`.
-
-If you don't want to use one of the supported providers, just remove the section from the config file.
+You can blacklist one or multiple players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS. The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
 
 ## Installation
 
-Install using the `go` toolchain:
+### Linux, macOS
 
-```
+Install the newest version using the `go` toolchain:
+
+```shell
 go install github.com/p-mng/goscrobble@latest
 ```
 
-Install from the [Arch User Repository](https://aur.archlinux.org/):
+Replace `@latest` with `@dev` for the latest development build.
 
+On macOS, [media-control](https://github.com/ungive/media-control) and [julienXX/terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
+
+```shell
+brew install media-control terminal-notifier
 ```
+
+### Arch Linux
+
+Manually install the newest version from the [Arch User Repository](https://aur.archlinux.org/):
+
+```shell
 git clone https://aur.archlinux.org/goscrobble.git
 cd goscrobble
 makepkg -crsi
 ```
+
+Or use an AUR helper like [paru](https://github.com/Morganamilo/paru):
+
+```shell
+paru -S goscrobble
+```
+
+### systemd user service
 
 After creating the config file, start the systemd user service using `systemctl --user enable --now goscrobble.service`. If you installed the package using `go` directly from git, you might need to update the `.service` file with your correct binary location (likely `~/go/bin/goscrobble`) and copy the service file to `~/.config/systemd/user`.
 
 ## Connect last.fm account
 
 1. [Create an API account](https://www.last.fm/api/account/create). Description, callback URL, and application homepage are not required.
-2. Create the `lastfm` section in your config file and enter the newly generated API key and shared secret.
+2. Create the `lastfm` section in your config file and enter the [newly generated](https://www.last.fm/api/accounts) API key and shared secret.
 3. Run `goscrobble auth`, and authenticate the application in your browser.
 4. Confirm the following prompt with `y`, the session key will be automatically written to your config file.
 
