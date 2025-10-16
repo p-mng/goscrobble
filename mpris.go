@@ -18,7 +18,7 @@ const (
 	PlaybackStopped = "Stopped"
 )
 
-type NowPlaying struct {
+type NowPlayingInfo struct {
 	Artists   []string
 	Track     string
 	Album     string
@@ -29,7 +29,7 @@ type NowPlaying struct {
 	Position       int64
 }
 
-func (n NowPlaying) JoinArtists() string {
+func (n NowPlayingInfo) JoinArtists() string {
 	return strings.Join(n.Artists, ", ")
 }
 
@@ -41,13 +41,13 @@ type ParsedRegexEntry struct {
 	Album   bool
 }
 
-func NowPlayingEquals(left NowPlaying, right NowPlaying) bool {
-	return reflect.DeepEqual(left.Artists, right.Artists) &&
-		left.Track == right.Track &&
-		left.Album == right.Album
+func (n NowPlayingInfo) Equals(other NowPlayingInfo) bool {
+	return reflect.DeepEqual(n.Artists, other.Artists) &&
+		n.Track == other.Track &&
+		n.Album == other.Album
 }
 
-func NowPlayingValid(n NowPlaying) bool {
+func (n NowPlayingInfo) Valid() bool {
 	switch {
 	case n.Album == "":
 		return false
@@ -66,9 +66,9 @@ func NowPlayingValid(n NowPlaying) bool {
 // https://specifications.freedesktop.org/mpris-spec/latest/
 func GetNowPlaying(
 	conn *dbus.Conn,
-	blacklist []*regexp.Regexp,
+	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexEntry,
-) (map[string]NowPlaying, error) {
+) (map[string]NowPlayingInfo, error) {
 	var dbusNames []string
 	if err := conn.
 		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
@@ -79,12 +79,12 @@ func GetNowPlaying(
 
 	var playerNames []string
 	for _, name := range dbusNames {
-		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !isBlacklisted(blacklist, name) {
+		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !isBlacklisted(playerBlacklist, name) {
 			playerNames = append(playerNames, name)
 		}
 	}
 
-	info := map[string]NowPlaying{}
+	info := map[string]NowPlayingInfo{}
 
 	for _, player := range playerNames {
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
@@ -135,7 +135,7 @@ func GetNowPlaying(
 			}
 		}
 
-		info[player] = NowPlaying{
+		info[player] = NowPlayingInfo{
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,

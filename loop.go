@@ -21,10 +21,10 @@ const (
 func RunMainLoop(conn *dbus.Conn, config *Config) {
 	log.Debug().Msg("started main loop")
 
-	previouslyPlaying := map[string]NowPlaying{}
+	previouslyPlaying := map[string]NowPlayingInfo{}
 	scrobbledPrevious := map[string]bool{}
 
-	var blacklist []*regexp.Regexp
+	var playerBlacklist []*regexp.Regexp
 
 	for _, expression := range config.Blacklist {
 		compiled, err := regexp.Compile(expression)
@@ -39,14 +39,14 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 		log.Debug().
 			Str("expression", expression).
 			Msg("compiled regex blacklist entry")
-		blacklist = append(blacklist, compiled)
+		playerBlacklist = append(playerBlacklist, compiled)
 	}
 
 	parsedRegexes := config.ParseRegexes()
 	log.Debug().Msg("parsed match/replace expressions")
 
 	for {
-		nowPlaying, err := GetNowPlaying(conn, blacklist, parsedRegexes)
+		nowPlaying, err := GetNowPlaying(conn, playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue
@@ -57,7 +57,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				log.Info().
 					Str("player", player).
 					Msg("new player found")
-				previouslyPlaying[player] = NowPlaying{}
+				previouslyPlaying[player] = NowPlayingInfo{}
 				scrobbledPrevious[player] = false
 			}
 		}
@@ -73,7 +73,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 		}
 
 		for player, status := range nowPlaying {
-			if !NowPlayingValid(status) {
+			if !status.Valid() {
 				continue
 			}
 
@@ -87,7 +87,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 				continue
 			}
 
-			if !NowPlayingEquals(status, previouslyPlaying[player]) {
+			if !status.Equals(previouslyPlaying[player]) {
 				status.Position = 0
 				status.Timestamp = time.Now().Unix()
 
@@ -153,7 +153,7 @@ func RunMainLoop(conn *dbus.Conn, config *Config) {
 
 func sendNowPlaying(player string,
 	provider Provider,
-	status NowPlaying,
+	status NowPlayingInfo,
 	conn *dbus.Conn,
 	config *Config,
 ) {
@@ -190,7 +190,7 @@ func sendNowPlaying(player string,
 
 func sendScrobble(player string,
 	provider Provider,
-	status NowPlaying,
+	status NowPlayingInfo,
 	conn *dbus.Conn,
 	config *Config,
 ) {
@@ -225,7 +225,7 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(nowPlaying NowPlaying, config *Config) (int64, error) {
+func minPlayTime(nowPlaying NowPlayingInfo, config *Config) (int64, error) {
 	if nowPlaying.Duration < 0 {
 		return 0, fmt.Errorf("invalid track length: %d", nowPlaying.Duration)
 	}

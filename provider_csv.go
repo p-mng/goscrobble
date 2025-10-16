@@ -10,11 +10,11 @@ func (c *CSVConfig) Name() string {
 	return "local CSV file"
 }
 
-func (c *CSVConfig) NowPlaying(_ NowPlaying) error {
+func (c *CSVConfig) NowPlaying(_ NowPlayingInfo) error {
 	return nil
 }
 
-func (c *CSVConfig) Scrobble(n NowPlaying) error {
+func (c *CSVConfig) Scrobble(n NowPlayingInfo) error {
 	readExisting := true
 
 	file, err := os.Open(c.Filename)

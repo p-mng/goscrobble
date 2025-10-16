@@ -15,7 +15,7 @@ func (l *LastFmConfig) Name() string {
 	return "last.fm"
 }
 
-func (l *LastFmConfig) NowPlaying(n NowPlaying) error {
+func (l *LastFmConfig) NowPlaying(n NowPlayingInfo) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
@@ -35,7 +35,7 @@ func (l *LastFmConfig) NowPlaying(n NowPlaying) error {
 	return err
 }
 
-func (l *LastFmConfig) Scrobble(n NowPlaying) error {
+func (l *LastFmConfig) Scrobble(n NowPlayingInfo) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
