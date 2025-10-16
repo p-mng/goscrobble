@@ -93,11 +93,19 @@ func ReadConfig() (*Config, error) {
 		return nil, err
 	}
 
-	fileName := fmt.Sprintf("%s/config.toml", configDir)
+	filename := fmt.Sprintf("%s/config.toml", configDir)
+
+	log.Debug().
+		Str("filename", filename).
+		Msg("reading config file")
 
 	//nolint:gosec
-	data, err := os.ReadFile(fileName)
+	data, err := os.ReadFile(filename)
 	if os.IsNotExist(err) {
+		log.Info().
+			Str("filename", filename).
+			Msg("config file does not exist, writing default config")
+
 		defaultConfig := Config{
 			PollRate:            2,
 			MinPlaybackDuration: 4 * 60,
@@ -110,12 +118,13 @@ func ReadConfig() (*Config, error) {
 			File:                nil,
 			CSV:                 nil,
 		}
+
 		defaultMarshalled, err := toml.Marshal(defaultConfig)
 		if err != nil {
 			return nil, err
 		}
 
-		if err := os.WriteFile(fileName, defaultMarshalled, 0600); err != nil {
+		if err := os.WriteFile(filename, defaultMarshalled, 0600); err != nil {
 			return nil, err
 		}
 
@@ -129,15 +138,28 @@ func ReadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	log.Debug().
+		Interface("config", config).
+		Msg("parsed config")
+
 	if config.PollRate <= 0 || config.PollRate > 60 {
+		log.Warn().
+			Int("poll_rate", config.PollRate).
+			Msg("invalid poll rate, resetting to default value")
 		config.PollRate = 2
 	}
 
 	// https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 	if config.MinPlaybackDuration <= 0 || config.MinPlaybackDuration > 20*60 {
+		log.Warn().
+			Int64("min_playback_duration", config.MinPlaybackDuration).
+			Msg("invalid minimum playback duration, resetting to default value")
 		config.MinPlaybackDuration = 4 * 60
 	}
 	if config.MinPlaybackPercent <= 0 || config.MinPlaybackPercent > 100 {
+		log.Warn().
+			Int64("min_playback_percent", config.MinPlaybackPercent).
+			Msg("invalid minimum playback percentage, resetting to default value")
 		config.MinPlaybackPercent = 50
 	}
 
