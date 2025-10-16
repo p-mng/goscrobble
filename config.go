@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 
+	np "github.com/p-mng/goscrobble/nowplaying"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -61,8 +62,8 @@ func (c Config) Providers() []Provider {
 	return providers
 }
 
-func (c Config) ParseRegexes() []ParsedRegexEntry {
-	var parsed []ParsedRegexEntry
+func (c Config) ParseRegexes() []np.ParsedRegexEntry {
+	var parsed []np.ParsedRegexEntry
 
 	for _, r := range c.Regexes {
 		match, err := regexp.Compile(r.Match)
@@ -73,7 +74,7 @@ func (c Config) ParseRegexes() []ParsedRegexEntry {
 				Msg("error compiling match/repalce expression")
 			continue
 		}
-		parsed = append(parsed, ParsedRegexEntry{
+		parsed = append(parsed, np.ParsedRegexEntry{
 			Match:   match,
 			Replace: r.Replace,
 			Artist:  r.Artist,

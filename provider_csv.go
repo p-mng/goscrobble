@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	np "github.com/p-mng/goscrobble/nowplaying"
 	"os"
 	"strconv"
 )
@@ -10,11 +11,11 @@ func (c *CSVConfig) Name() string {
 	return "local CSV file"
 }
 
-func (c *CSVConfig) NowPlaying(_ NowPlayingInfo) error {
+func (c *CSVConfig) NowPlaying(_ np.NowPlayingInfo) error {
 	return nil
 }
 
-func (c *CSVConfig) Scrobble(n NowPlayingInfo) error {
+func (c *CSVConfig) Scrobble(n np.NowPlayingInfo) error {
 	readExisting := true
 
 	file, err := os.Open(c.Filename)
