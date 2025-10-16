@@ -145,7 +145,7 @@ func ReadConfig() (*Config, error) {
 		log.Warn().Msg("goscrobble will not send desktop notifications on failed scrobbles")
 	}
 
-	if config.LastFm == nil && config.File == nil {
+	if len(config.Providers()) == 0 {
 		log.Warn().Msg("no scrobbling providers configured, this is probably not what you want")
 	}
 
