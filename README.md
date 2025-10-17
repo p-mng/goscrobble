@@ -11,7 +11,8 @@
 - **simple**: human-readable config file using [TOML](https://toml.io/en/)
 - **lightweight**: command line interface, no GUI, minimal dependencies, fewer lines of code than the alternatives listed below
 - **privacy-friendly**: no external services required, everything stays on your device (unless you use [last.fm](https://www.last.fm/))
-- **multi-player support**: supports scrobbling from multiple players (e.g. YouTube Music and Spotify) at the same time
+- **cross-platform**: currently works on Linux (MPRIS) and macOS (media-control)
+- **multi-player support**: supports scrobbling from multiple players (e.g. YouTube Music and Spotify) at the same time (only supported on Linux)
 
 ## Configuration
 
