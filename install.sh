@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-GOPROXY=${GOPROXY:-"direct"}
-GOSCROBBLE_VERSION=${GOSCROBBLE_VERSION:-"v0.5.0"}
+export GOPROXY=${GOPROXY:-"direct"}
+export GOSCROBBLE_VERSION=${GOSCROBBLE_VERSION:-"v0.5.0"}
 REQUIRED_BINS=("go" "envsubst" "sed" "curl")
 
 is_tag() {
@@ -30,8 +30,17 @@ else
 	url_prefix="https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/${GOSCROBBLE_VERSION}"
 fi
 
-GOSCROBBLE_PATH=$(which goscrobble)
-GOSCROBBLE_PATH=${GOSCROBBLE_PATH:-"$HOME/go/bin/goscrobble"}
+if [[ -z "$(which goscrobble)" ]]; then
+	GOPATH=${GOPATH:-"$HOME/go"}
+
+	echo "goscrobble not found in path, assuming installation at $GOPATH/goscrobble"
+	GOSCROBBLE_PATH="$GOPATH/go/bin/goscrobble"
+else
+	echo "goscrobble installation found at $(which goscrobble)"
+	GOSCROBBLE_PATH="$(which goscrobble)"
+fi
+
+export GOSCROBBLE_PATH
 
 set -e
 
