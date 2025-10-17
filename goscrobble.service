@@ -4,7 +4,7 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/env goscrobble run
+ExecStart=$GOSCROBBLE_PATH run
 
 [Install]
 WantedBy=default.target

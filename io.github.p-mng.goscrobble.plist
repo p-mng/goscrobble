@@ -6,7 +6,7 @@
     <string>io.github.p-mng.goscrobble</string>
     <key>ProgramArguments</key>
     <array>
-      <string>/Users/{username}/go/bin/goscrobble</string>
+      <string>/Users/$USER/go/bin/goscrobble</string>
       <string>run</string>
     </array>
     <key>EnvironmentVariables</key>
@@ -20,8 +20,8 @@
     <key>KeepAlive</key>
     <false/>
     <key>StandardOutPath</key>
-    <string>/Users/{username}/Library/Logs/goscrobble.log</string>
+    <string>/Users/$USER/Library/Logs/goscrobble.log</string>
     <key>StandardErrorPath</key>
-    <string>/Users/{username}/Library/Logs/goscrobble.error.log</string>
+    <string>/Users/$USER/Library/Logs/goscrobble.error.log</string>
   </dict>
 </plist>
