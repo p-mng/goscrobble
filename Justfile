@@ -3,9 +3,11 @@ format:
     go mod tidy
     fd --hidden --extension yml --exec-batch yamlfmt
     fd --hidden --extension plist --exec xmllint --format --output {} {}
+    fd --hidden --extension sh --exec-batch  shfmt --write
 
 lint:
     golangci-lint run
+    shellcheck install.sh
 
 test:
     go test -v ./...
