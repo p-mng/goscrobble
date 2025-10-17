@@ -52,8 +52,8 @@ if [[ "$(uname -s)" = "Darwin" ]]; then
 elif [[ "$(uname -s)" = "Linux" ]]; then
 	echo "installing systemd user service"
 
-	mkdir -p "$HOME/.config/systemd"
-	curl "$url_prefix/goscrobble.service" | envsubst >"$HOME/.config/systemd/goscrobble.service"
+	mkdir -p "$HOME/.config/systemd/user"
+	curl "$url_prefix/goscrobble.service" | envsubst >"$HOME/.config/systemd/user/goscrobble.service"
 else
 	echo "unsupported platform: $(uname -s)"
 	echo "please create a daemon manually according to your system's manual"
