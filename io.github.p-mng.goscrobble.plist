@@ -3,7 +3,7 @@
 <plist version="1.0">
   <dict>
     <key>Label</key>
-    <string>com.example.goscrobble</string>
+    <string>io.github.p-mng.goscrobble</string>
     <key>ProgramArguments</key>
     <array>
       <string>/Users/{username}/go/bin/goscrobble</string>
