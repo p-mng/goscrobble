@@ -1,7 +1,8 @@
 format:
     go fmt
     go mod tidy
-    fd --hidden --extension yml --extension yaml --exec-batch yamlfmt
+    fd --hidden --extension yml --exec-batch yamlfmt
+    fd --hidden --extension plist --exec xmllint --format --output {} {}
 
 lint:
     golangci-lint run

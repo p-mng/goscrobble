@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.example.goscrobble</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/Users/{username}/go/bin/goscrobble</string>
+      <string>run</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <!-- default: /usr/bin:/bin:/usr/sbin:/sbin -->
+      <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>StandardOutPath</key>
+    <string>/Users/{username}/Library/Logs/goscrobble.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/{username}/Library/Logs/goscrobble.error.log</string>
+  </dict>
+</plist>
