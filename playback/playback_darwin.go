@@ -12,6 +12,7 @@ import (
 type mediaControlInfo struct {
 	PlaybackRate          int       `json:"playbackRate"`
 	Album                 string    `json:"album"`
+	ElapsedTimeNow        float64   `json:"elapsedTimeNow"`
 	ElapsedTime           float64   `json:"elapsedTime"`
 	Timestamp             time.Time `json:"timestamp"`
 	BundleIdentifier      string    `json:"bundleIdentifier"`
@@ -33,7 +34,7 @@ func GetInfo(
 ) (map[string]Info, error) {
 	log.Debug().Msg("getting playback metadata using media-control")
 
-	cmd := exec.Command("/usr/bin/env", "media-control", "get")
+	cmd := exec.Command("/usr/bin/env", "media-control", "get", "--now")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
@@ -60,7 +61,7 @@ func GetInfo(
 		Duration:       int64(outputParsed.Duration),
 		Timestamp:      outputParsed.Timestamp.Unix(),
 		PlaybackStatus: playbackStatus(outputParsed.Playing),
-		Position:       int64(outputParsed.ElapsedTime),
+		Position:       int64(outputParsed.ElapsedTimeNow),
 	}
 
 	playbackInfo.RegexReplace(regexes)
