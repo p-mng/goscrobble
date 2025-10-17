@@ -17,7 +17,7 @@ import (
 func main() {
 	cmd := &cli.Command{
 		Name:  "goscrobble",
-		Usage: "A simple music scrobbler daemon for MPRIS-based music players",
+		Usage: "A simple, cross-platform music scrobbler daemon",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:    "debug",

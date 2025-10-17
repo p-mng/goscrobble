@@ -1,10 +1,10 @@
 [Unit]
-Description=MPRIS scrobbler daemon
+Description=A simple, cross-platform music scrobbler daemon
 Wants=network-online.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/goscrobble run
+ExecStart=/usr/bin/env goscrobble run
 
 [Install]
 WantedBy=default.target
