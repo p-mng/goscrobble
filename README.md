@@ -67,15 +67,15 @@ You can blacklist one or multiple players using Go [regular expressions](https:/
 
 ## Installation
 
-### Linux, macOS
+### Linux, macOS (install script)
 
-Install the newest version using the `go` toolchain:
+Using the provided install script:
 
 ```shell
-go install github.com/p-mng/goscrobble@latest
+curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/install.sh | bash
 ```
 
-Replace `@latest` with `@dev` for the latest development build.
+Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=dev`).
 
 On macOS, [media-control](https://github.com/ungive/media-control) and [julienXX/terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
 
