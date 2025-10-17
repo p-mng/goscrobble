@@ -15,7 +15,7 @@
 - **lightweight**: command line interface, no GUI, minimal dependencies, fewer lines of code than the alternatives listed below
 - **privacy-friendly**: no external services required, everything stays on your device (unless you use [last.fm](https://www.last.fm/))
 - **cross-platform**: currently works on Linux (MPRIS) and macOS (media-control)
-- **multi-player support**: supports scrobbling from multiple players (e.g. YouTube Music and Spotify) at the same time (only supported on Linux)
+- **multi-player support**: supports scrobbling from multiple players (e.g., YouTube Music and Spotify) at the same time (only supported on Linux)
 
 ## Configuration
 
@@ -99,10 +99,6 @@ Or use an AUR helper like [paru](https://github.com/Morganamilo/paru):
 paru -S goscrobble
 ```
 
-### systemd user service
-
-After creating the config file, start the systemd user service using `systemctl --user enable --now goscrobble.service`. If you installed the package using `go` directly from git, you might need to update the `.service` file with your correct binary location (likely `~/go/bin/goscrobble`) and copy the service file to `~/.config/systemd/user`.
-
 ## Connect last.fm account
 
 1. [Create an API account](https://www.last.fm/api/account/create). Description, callback URL, and application homepage are not required.
@@ -116,6 +112,12 @@ After creating the config file, start the systemd user service using `systemctl 
 
 tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right now, you should add `tidal-hifi` to your blacklist, as the playlist name is incorrectly reported as the album name (see [tidal-hifi issue 505](https://github.com/Mastermindzh/tidal-hifi/issues/505)).
 
+## TODOs
+
+- Add more scrobbling providers (e.g., Maloja, LibreFM, Listenbrainz, etc.)
+- Add Microsoft Windows support
+- Test more Linux distros, macOS versions, and music players
+
 ## Similar projects
 
 - [mariusor/mpris-scrobbler](https://github.com/mariusor/mpris-scrobbler): MPRIS scrobbler written in C
@@ -123,4 +125,4 @@ tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right 
 - [hrfee/go-scrobble](https://github.com/hrfee/go-scrobble): "ugly last.fm scrobbler" written in Go
 - [web-scrobbler/web-scrobbler](https://github.com/web-scrobbler/web-scrobbler): Browser scrobbler written in TypeScript
 
-I found all of the above to have different issues (e.g. [pausing breaks scrobbling](https://github.com/mariusor/mpris-scrobbler/issues/56) or [updates to the page layout preventing track detection](https://github.com/web-scrobbler/web-scrobbler/issues/4849)), so I decided to write my own scrobbler.
+I found all of the above to have different issues (e.g., [pausing breaks scrobbling](https://github.com/mariusor/mpris-scrobbler/issues/56) or [updates to the page layout preventing track detection](https://github.com/web-scrobbler/web-scrobbler/issues/4849)), so I decided to write my own scrobbler.
