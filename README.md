@@ -117,6 +117,7 @@ tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right 
 - Add more scrobbling providers (e.g., Maloja, LibreFM, Listenbrainz, etc.)
 - Add Microsoft Windows support
 - Test more Linux distros, macOS versions, and music players
+- Add unit tests
 
 ## Similar projects
 
@@ -126,3 +127,11 @@ tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right 
 - [web-scrobbler/web-scrobbler](https://github.com/web-scrobbler/web-scrobbler): Browser scrobbler written in TypeScript
 
 I found all of the above to have different issues (e.g., [pausing breaks scrobbling](https://github.com/mariusor/mpris-scrobbler/issues/56) or [updates to the page layout preventing track detection](https://github.com/web-scrobbler/web-scrobbler/issues/4849)), so I decided to write my own scrobbler.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
