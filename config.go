@@ -11,17 +11,17 @@ import (
 )
 
 type Config struct {
-	PollRate            int          `toml:"poll_rate" comment:"track position update frequency in seconds"`
-	MinPlaybackDuration int64        `toml:"min_playback_duration" comment:"minimum playback duration in seconds"`
-	MinPlaybackPercent  int64        `toml:"min_playback_percent" comment:"minimum playback percentage"`
-	NotifyOnScrobble    bool         `toml:"notify_on_scrobble" comment:"send a desktop notification when a scrobble is saved"`
-	NotifyOnError       bool         `toml:"notify_on_error" comment:"send a desktop notification when a scrobble cannot be saved"`
-	Blacklist           []string     `toml:"blacklist" comment:"player blacklist"`
-	Regexes             []RegexEntry `toml:"regexes" comment:"regex match/replace"`
+	PollRate            int          `toml:"poll_rate"`
+	MinPlaybackDuration int64        `toml:"min_playback_duration"`
+	MinPlaybackPercent  int64        `toml:"min_playback_percent"`
+	NotifyOnScrobble    bool         `toml:"notify_on_scrobble"`
+	NotifyOnError       bool         `toml:"notify_on_error"`
+	Blacklist           []string     `toml:"blacklist"`
+	Regexes             []RegexEntry `toml:"regexes"`
 
-	LastFm *LastFmConfig `toml:"lastfm" comment:"last.fm configuration"`
-	File   *FileConfig   `toml:"file" comment:"local file configuration"`
-	CSV    *CSVConfig    `toml:"csv" comment:"CSV file configuration"`
+	LastFm *LastFmConfig `toml:"lastfm"`
+	File   *FileConfig   `toml:"file"`
+	CSV    *CSVConfig    `toml:"csv"`
 }
 
 type RegexEntry struct {
@@ -33,17 +33,17 @@ type RegexEntry struct {
 }
 
 type LastFmConfig struct {
-	Key        string `toml:"key" comment:"API key"`
-	Secret     string `toml:"secret" comment:"shared secret"`
-	SessionKey string `toml:"session_key" comment:"session key (automatically generated using goscrobble auth)"`
+	Key        string `toml:"key"`
+	Secret     string `toml:"secret"`
+	SessionKey string `toml:"session_key"`
 }
 
 type FileConfig struct {
-	Filename string `toml:"filename" comment:"file to write scrobbles to"`
+	Filename string `toml:"filename"`
 }
 
 type CSVConfig struct {
-	Filename string `toml:"filename" comment:"file to write scrobbles to"`
+	Filename string `toml:"filename"`
 }
 
 func (c Config) Providers() []Provider {
