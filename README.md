@@ -7,7 +7,7 @@
 `goscrobble` is a simple, cross-platform music scrobbler daemon using [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/)/[D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) on Linux and [ungive/media-control](https://github.com/ungive/media-control) on macOS.
 
 > [!WARNING]
-> `goscrobble` is still beta software. Features may break without warning (especially on macOS), scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk, as data loss is possible.
+> This project is still beta software. Features may break without warning (especially on macOS), scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
 
 ## Features
 
