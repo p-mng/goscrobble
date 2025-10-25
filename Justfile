@@ -7,7 +7,7 @@ format:
 
 lint:
     golangci-lint run
-    shellcheck install.sh
+    shellcheck scripts/install.sh
 
 test:
     go test -v ./...
