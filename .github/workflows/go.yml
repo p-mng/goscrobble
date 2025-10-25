@@ -1,9 +1,7 @@
 name: Lint and build binary
 on:
   push:
-    branches: ["main", "dev"]
-  pull_request:
-    branches: ["main", "dev"]
+    paths: ["**.go"]
 jobs:
   golangci:
     strategy:
