@@ -15,7 +15,7 @@ func (l *LastFmConfig) Name() string {
 	return "last.fm"
 }
 
-func (l *LastFmConfig) NowPlaying(n Info) error {
+func (l *LastFmConfig) NowPlaying(p PlaybackStatus) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
@@ -27,15 +27,15 @@ func (l *LastFmConfig) NowPlaying(n Info) error {
 
 	// https://www.last.fm/api/show/track.updateNowPlaying
 	_, err := lastFm.Track.UpdateNowPlaying(lastfm.P{
-		"artist":   n.JoinArtists(),
-		"track":    n.Track,
-		"album":    n.Album,
-		"duration": n.Duration,
+		"artist":   p.JoinArtists(),
+		"track":    p.Track,
+		"album":    p.Album,
+		"duration": p.Duration,
 	})
 	return err
 }
 
-func (l *LastFmConfig) Scrobble(n Info) error {
+func (l *LastFmConfig) Scrobble(n PlaybackStatus) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}

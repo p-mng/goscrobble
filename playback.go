@@ -15,7 +15,7 @@ const (
 	PlaybackStopped = "Stopped"
 )
 
-type Info struct {
+type PlaybackStatus struct {
 	Artists   []string
 	Track     string
 	Album     string
@@ -26,7 +26,7 @@ type Info struct {
 	Position       int64
 }
 
-func (p Info) JoinArtists() string {
+func (p PlaybackStatus) JoinArtists() string {
 	return strings.Join(p.Artists, ", ")
 }
 
@@ -38,13 +38,13 @@ type ParsedRegexReplace struct {
 	Album   bool
 }
 
-func (p Info) Equals(other Info) bool {
+func (p PlaybackStatus) Equals(other PlaybackStatus) bool {
 	return reflect.DeepEqual(p.Artists, other.Artists) &&
 		p.Track == other.Track &&
 		p.Album == other.Album
 }
 
-func (p Info) Valid() bool {
+func (p PlaybackStatus) Valid() bool {
 	switch {
 	case p.Album == "":
 		return false
@@ -59,7 +59,7 @@ func (p Info) Valid() bool {
 	}
 }
 
-func (p *Info) RegexReplace(regexes []ParsedRegexReplace) {
+func (p *PlaybackStatus) RegexReplace(regexes []ParsedRegexReplace) {
 	for _, r := range regexes {
 		log.Debug().
 			Str("expression", r.Match.String()).

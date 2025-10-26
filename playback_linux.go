@@ -15,7 +15,7 @@ import (
 func GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexReplace,
-) (map[string]Info, error) {
+) (map[string]PlaybackStatus, error) {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		return nil, err
@@ -37,13 +37,13 @@ func GetInfo(
 		}
 	}
 
-	playerPlaybackInfo := map[string]Info{}
+	playerPlaybackStatus := map[string]PlaybackStatus{}
 
 	for _, player := range playerNames {
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
 
 		metadata, err1 := getProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
-		playbackStatus, err2 := getProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
+		status, err2 := getProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
 		position, err3 := getProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
 
 		if err := errors.Join(err1, err2, err3); err != nil {
@@ -66,22 +66,22 @@ func GetInfo(
 			continue
 		}
 
-		playbackInfo := Info{
+		playbackStatus := PlaybackStatus{
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,
 			Duration:       *duration / 1_000_000,
 			Timestamp:      0,
-			PlaybackStatus: *playbackStatus,
+			PlaybackStatus: *status,
 			Position:       *position / 1_000_000,
 		}
 
-		playbackInfo.RegexReplace(regexes)
+		playbackStatus.RegexReplace(regexes)
 
-		playerPlaybackInfo[player] = playbackInfo
+		playerPlaybackStatus[player] = playbackStatus
 	}
 
-	return playerPlaybackInfo, nil
+	return playerPlaybackStatus, nil
 }
 
 func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {

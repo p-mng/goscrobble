@@ -31,7 +31,7 @@ type mediaControlInfo struct {
 func GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexReplace,
-) (map[string]Info, error) {
+) (map[string]PlaybackStatus, error) {
 	log.Debug().Msg("getting playback metadata using media-control")
 
 	cmd := exec.Command("/usr/bin/env", "media-control", "get", "--now")
@@ -47,14 +47,14 @@ func GetInfo(
 
 	if outputParsed == (mediaControlInfo{}) {
 		log.Debug().Msg("media-control did not find any active players")
-		return map[string]Info{}, nil
+		return map[string]PlaybackStatus{}, nil
 	}
 
 	if isBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
-		return map[string]Info{}, nil
+		return map[string]PlaybackStatus{}, nil
 	}
 
-	playbackInfo := Info{
+	playbackStatus := PlaybackStatus{
 		Artists:        []string{outputParsed.Artist},
 		Track:          outputParsed.Title,
 		Album:          outputParsed.Album,
@@ -64,10 +64,10 @@ func GetInfo(
 		Position:       int64(outputParsed.ElapsedTimeNow),
 	}
 
-	playbackInfo.RegexReplace(regexes)
+	playbackStatus.RegexReplace(regexes)
 
-	return map[string]Info{
-		outputParsed.BundleIdentifier: playbackInfo,
+	return map[string]PlaybackStatus{
+		outputParsed.BundleIdentifier: playbackStatus,
 	}, nil
 }
 

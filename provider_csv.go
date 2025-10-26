@@ -10,11 +10,11 @@ func (c *CSVConfig) Name() string {
 	return "local CSV file"
 }
 
-func (c *CSVConfig) NowPlaying(_ Info) error {
+func (c *CSVConfig) NowPlaying(_ PlaybackStatus) error {
 	return nil
 }
 
-func (c *CSVConfig) Scrobble(n Info) error {
+func (c *CSVConfig) Scrobble(p PlaybackStatus) error {
 	var scrobbles [][]string
 
 	file, err := os.Open(c.Filename)
@@ -31,7 +31,7 @@ func (c *CSVConfig) Scrobble(n Info) error {
 
 	scrobbles = append(
 		scrobbles,
-		createRow(n.JoinArtists(), n.Track, n.Album, n.Duration, n.Timestamp),
+		createRow(p.JoinArtists(), p.Track, p.Album, p.Duration, p.Timestamp),
 	)
 
 	newFile, err := os.Create(c.Filename)

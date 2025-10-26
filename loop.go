@@ -20,7 +20,7 @@ const (
 func RunMainLoop(config *Config) {
 	log.Debug().Msg("started main loop")
 
-	previouslyPlaying := map[string]Info{}
+	previouslyPlaying := map[string]PlaybackStatus{}
 	scrobbledPrevious := map[string]bool{}
 
 	var playerBlacklist []*regexp.Regexp
@@ -50,24 +50,24 @@ func RunMainLoop(config *Config) {
 			Msg("waiting for next poll")
 		time.Sleep(time.Second * time.Duration(config.PollRate))
 
-		playbackInfo, err := GetInfo(playerBlacklist, parsedRegexes)
+		playbackStatus, err := GetInfo(playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue
 		}
 
-		for player := range playbackInfo {
+		for player := range playbackStatus {
 			if _, ok := previouslyPlaying[player]; !ok {
 				log.Info().
 					Str("player", player).
 					Msg("new player found")
-				previouslyPlaying[player] = Info{}
+				previouslyPlaying[player] = PlaybackStatus{}
 				scrobbledPrevious[player] = false
 			}
 		}
 
 		for player := range previouslyPlaying {
-			if _, ok := playbackInfo[player]; !ok {
+			if _, ok := playbackStatus[player]; !ok {
 				log.Info().
 					Str("player", player).
 					Msg("player disappeared")
@@ -76,7 +76,7 @@ func RunMainLoop(config *Config) {
 			}
 		}
 
-		for player, status := range playbackInfo {
+		for player, status := range playbackStatus {
 			if !status.Valid() {
 				continue
 			}
@@ -148,7 +148,7 @@ func RunMainLoop(config *Config) {
 
 func sendNowPlaying(player string,
 	provider Provider,
-	status Info,
+	status PlaybackStatus,
 	config *Config,
 ) {
 	log.Debug().
@@ -182,7 +182,7 @@ func sendNowPlaying(player string,
 
 func sendScrobble(player string,
 	provider Provider,
-	status Info,
+	status PlaybackStatus,
 	config *Config,
 ) {
 	log.Debug().
@@ -214,12 +214,12 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(playbackInfo Info, config *Config) (int64, error) {
-	if playbackInfo.Duration < 0 {
-		return 0, fmt.Errorf("invalid track length: %d", playbackInfo.Duration)
+func minPlayTime(status PlaybackStatus, config *Config) (int64, error) {
+	if status.Duration < 0 {
+		return 0, fmt.Errorf("invalid track length: %d", status.Duration)
 	}
 
-	half := int64((float64(playbackInfo.Duration) / 100) * float64(config.MinPlaybackPercent))
+	half := int64((float64(status.Duration) / 100) * float64(config.MinPlaybackPercent))
 	return min(half, config.MinPlaybackDuration), nil
 }
 
