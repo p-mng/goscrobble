@@ -49,6 +49,13 @@ func RunMainLoop(config Config) {
 	sinks := config.GetSinks()
 	log.Debug().Msg("set up sources and sinks")
 
+	if len(sources) == 0 {
+		log.Warn().Msg("no sources configured")
+	}
+	if len(sinks) == 0 {
+		log.Warn().Msg("no sinks configured")
+	}
+
 	for {
 		log.Debug().
 			Dur("duration", time.Duration(config.PollRate)).

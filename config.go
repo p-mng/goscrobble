@@ -223,12 +223,6 @@ func (c *Config) Validate() {
 	if !c.NotifyOnError {
 		log.Warn().Msg("goscrobble will not send desktop notifications on failed scrobbles")
 	}
-	if len(c.GetSinks()) == 0 {
-		log.Warn().Msg("no scrobbling sinks configured, this is probably not what you want")
-	}
-	if c.Sinks.LastFm != nil && c.Sinks.LastFm.SessionKey == "" {
-		log.Warn().Msg("last.fm sink is configured, but not authenticated: run goscrobble auth to generate a token")
-	}
 }
 
 func (c Config) WriteConfig() error {
