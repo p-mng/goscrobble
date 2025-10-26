@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/p-mng/goscrobble/notify"
 	"github.com/rs/zerolog/log"
 )
 
@@ -225,7 +224,7 @@ func minPlayTime(playbackInfo Info, config *Config) (int64, error) {
 }
 
 func sendNotification(summary, body string, replacesID uint32) uint32 {
-	id, err := notify.SendNotification(replacesID, summary, body)
+	id, err := SendNotification(replacesID, summary, body)
 	if err != nil {
 		log.Error().
 			Err(err).

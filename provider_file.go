@@ -5,8 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/p-mng/goscrobble/close"
 )
 
 func (f *FileConfig) Name() string {
@@ -23,7 +21,7 @@ func (f *FileConfig) Scrobble(n Info) error {
 	if err != nil {
 		return err
 	}
-	defer close.File(file)
+	defer CloseFile(file)
 
 	line := strings.Join([]string{
 		n.Track,

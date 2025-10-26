@@ -1,8 +1,7 @@
-package notify
+package main
 
 import (
 	"github.com/godbus/dbus/v5"
-	"github.com/p-mng/goscrobble/close"
 	"github.com/rs/zerolog/log"
 )
 
@@ -23,7 +22,7 @@ func SendNotification(
 	if err != nil {
 		return 0, err
 	}
-	defer close.DBus(conn)
+	defer CloseDBus(conn)
 
 	args := []any{
 		"goscrobble",

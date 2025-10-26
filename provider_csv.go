@@ -4,8 +4,6 @@ import (
 	"encoding/csv"
 	"os"
 	"strconv"
-
-	"github.com/p-mng/goscrobble/close"
 )
 
 func (c *CSVConfig) Name() string {
@@ -29,7 +27,7 @@ func (c *CSVConfig) Scrobble(n Info) error {
 	var scrobbles [][]string
 
 	if readExisting {
-		defer close.File(file)
+		defer CloseFile(file)
 
 		readScrobbles, err := csv.NewReader(file).ReadAll()
 		if err != nil {
@@ -52,7 +50,7 @@ func (c *CSVConfig) Scrobble(n Info) error {
 	if err != nil {
 		return err
 	}
-	defer close.File(newFile)
+	defer CloseFile(newFile)
 
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }

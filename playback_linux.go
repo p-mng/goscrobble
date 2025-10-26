@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/godbus/dbus/v5"
-	"github.com/p-mng/goscrobble/close"
 	"github.com/rs/zerolog/log"
 )
 
@@ -21,7 +20,7 @@ func GetInfo(
 	if err != nil {
 		return nil, err
 	}
-	defer close.DBus(conn)
+	defer CloseDBus(conn)
 
 	var dbusNames []string
 	if err := conn.
