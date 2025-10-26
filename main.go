@@ -39,9 +39,9 @@ func main() {
 				Action: cmdRun,
 			},
 			{
-				Name:   "auth",
-				Usage:  "Authenticates last.fm session",
-				Action: cmdAuth,
+				Name:   "lastfm-auth",
+				Usage:  "Write last.fm session key and username to the config file",
+				Action: cmdLastFmAuth,
 			},
 		},
 	}
@@ -66,7 +66,7 @@ func cmdRun(_ context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func cmdAuth(_ context.Context, cmd *cli.Command) error {
+func cmdLastFmAuth(_ context.Context, cmd *cli.Command) error {
 	setupLogger(cmd)
 
 	config, err := ReadConfig()
