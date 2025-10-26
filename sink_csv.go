@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"os"
 	"strconv"
+	"time"
 )
 
 func (c *CSVConfig) Name() string {
@@ -43,12 +44,12 @@ func (c *CSVConfig) Scrobble(p PlaybackStatus) error {
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }
 
-func createRow(artists, track, album string, duration, timestamp int64) []string {
+func createRow(artists, track, album string, duration time.Duration, timestamp time.Time) []string {
 	return []string{
 		artists,
 		track,
 		album,
-		strconv.FormatInt(duration, 10),
-		strconv.FormatInt(timestamp, 10),
+		strconv.FormatFloat(duration.Seconds(), 'f', 2, 64),
+		timestamp.Format(time.RFC1123),
 	}
 }

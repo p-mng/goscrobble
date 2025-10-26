@@ -97,8 +97,8 @@ func RunMainLoop(config Config) {
 			}
 
 			if !status.Equals(previouslyPlaying[player]) {
-				status.Position = 0
-				status.Timestamp = time.Now().Unix()
+				status.Position = time.Duration(0)
+				status.Timestamp = time.Now()
 
 				previouslyPlaying[player] = status
 				scrobbledPrevious[player] = false
@@ -219,13 +219,15 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(status PlaybackStatus, config Config) (int64, error) {
-	if status.Duration < 0 {
+func minPlayTime(status PlaybackStatus, config Config) (time.Duration, error) {
+	if status.Duration < time.Duration(0) {
 		return 0, fmt.Errorf("invalid track length: %d", status.Duration)
 	}
 
-	half := int64((float64(status.Duration) / 100) * float64(config.MinPlaybackPercent))
-	return min(half, config.MinPlaybackDuration), nil
+	configDuration := time.Duration(config.MinPlaybackDuration * int64(time.Second))
+	halfDuration := time.Duration(int64(status.Duration/100) * config.MinPlaybackPercent)
+
+	return min(configDuration, halfDuration), nil
 }
 
 func sendNotification(summary, body string, replacesID uint32) uint32 {

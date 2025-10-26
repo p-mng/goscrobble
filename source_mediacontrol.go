@@ -45,27 +45,27 @@ func (s MediaControlSource) GetInfo(
 		return map[string]PlaybackStatus{}, nil
 	}
 
+	var status string
+	if outputParsed.Playing {
+		status = PlaybackPlaying
+	} else {
+		status = PlaybackStopped
+	}
+
 	playbackStatus := PlaybackStatus{
 		Artists:   []string{outputParsed.Artist},
 		Track:     outputParsed.Title,
 		Album:     outputParsed.Album,
-		Duration:  int64(outputParsed.Duration),
-		Timestamp: outputParsed.Timestamp.Unix(),
-		Status:    Status(outputParsed.Playing),
-		Position:  int64(outputParsed.ElapsedTimeNow),
+		Duration:  time.Duration(outputParsed.Duration * float64(time.Second)),
+		Timestamp: time.Time{},
+		Status:    status,
+		Position:  time.Duration(outputParsed.ElapsedTimeNow * float64(time.Second)),
 	}
 
 	playbackStatus.RegexReplace(regexes)
 
 	playerName := fmt.Sprintf("%s:%s", s.Name(), outputParsed.BundleIdentifier)
 	return map[string]PlaybackStatus{playerName: playbackStatus}, nil
-}
-
-func Status(playing bool) string {
-	if playing {
-		return PlaybackPlaying
-	}
-	return PlaybackStopped
 }
 
 // https://github.com/ungive/media-control

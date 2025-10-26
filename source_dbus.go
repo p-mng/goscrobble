@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/godbus/dbus/v5"
 	"github.com/rs/zerolog/log"
@@ -76,10 +77,10 @@ func (s DBusSource) GetInfo(
 			Artists:   *artists,
 			Track:     *track,
 			Album:     *album,
-			Duration:  *duration / 1_000_000,
-			Timestamp: 0,
+			Duration:  time.Duration(*duration * int64(time.Microsecond)),
+			Timestamp: time.Time{},
 			Status:    *status,
-			Position:  *position / 1_000_000,
+			Position:  time.Duration(*position * int64(time.Microsecond)),
 		}
 
 		playbackStatus.RegexReplace(regexes)

@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -19,11 +20,11 @@ type PlaybackStatus struct {
 	Artists   []string
 	Track     string
 	Album     string
-	Duration  int64
-	Timestamp int64
+	Duration  time.Duration
+	Timestamp time.Time
 
 	Status   string
-	Position int64
+	Position time.Duration
 }
 
 func (p PlaybackStatus) JoinArtists() string {

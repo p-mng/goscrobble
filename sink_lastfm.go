@@ -30,12 +30,12 @@ func (l *LastFmConfig) NowPlaying(p PlaybackStatus) error {
 		"artist":   p.JoinArtists(),
 		"track":    p.Track,
 		"album":    p.Album,
-		"duration": p.Duration,
+		"duration": max(int(p.Duration.Seconds()), 30),
 	})
 	return err
 }
 
-func (l *LastFmConfig) Scrobble(n PlaybackStatus) error {
+func (l *LastFmConfig) Scrobble(p PlaybackStatus) error {
 	if l.SessionKey == "" {
 		return errors.New(ErrLastFmNotAuthenticated)
 	}
@@ -46,11 +46,11 @@ func (l *LastFmConfig) Scrobble(n PlaybackStatus) error {
 
 	// https://www.last.fm/api/show/track.scrobble
 	_, err := lastFm.Track.Scrobble(lastfm.P{
-		"artist":    n.JoinArtists(),
-		"track":     n.Track,
-		"album":     n.Album,
-		"duration":  max(n.Duration, 30),
-		"timestamp": n.Timestamp,
+		"artist":    p.JoinArtists(),
+		"track":     p.Track,
+		"album":     p.Album,
+		"duration":  max(int(p.Duration.Seconds()), 30),
+		"timestamp": p.Timestamp.Unix(),
 	})
 	return err
 }
