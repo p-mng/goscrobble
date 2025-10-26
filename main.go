@@ -75,12 +75,12 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	if config.LastFm == nil || config.LastFm.Key == "" || config.LastFm.Secret == "" {
+	if config.Sinks.LastFm == nil || config.Sinks.LastFm.Key == "" || config.Sinks.LastFm.Secret == "" {
 		log.Error().Msg("last.fm provider is not configured")
 		return nil
 	}
 
-	api := lastfm.New(config.LastFm.Key, config.LastFm.Secret)
+	api := lastfm.New(config.Sinks.LastFm.Key, config.Sinks.LastFm.Secret)
 
 	token, err := api.GetToken()
 	if err != nil {
@@ -114,7 +114,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	sessionKey := api.GetSessionKey()
 
-	config.LastFm.SessionKey = sessionKey
+	config.Sinks.LastFm.SessionKey = sessionKey
 
 	if err := config.WriteConfig(); err != nil {
 		log.Error().Err(err).Msg("failed to write updated config file")

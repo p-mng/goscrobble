@@ -18,8 +18,7 @@ type Config struct {
 	Blacklist           []string       `toml:"blacklist"`
 	Regexes             []RegexReplace `toml:"regexes"`
 
-	LastFm *LastFmConfig `toml:"lastfm"`
-	CSV    *CSVConfig    `toml:"csv"`
+	Sinks SinksConfig `toml:"sinks"`
 }
 
 type RegexReplace struct {
@@ -28,6 +27,11 @@ type RegexReplace struct {
 	Artist  bool   `toml:"artist"`
 	Track   bool   `toml:"track"`
 	Album   bool   `toml:"album"`
+}
+
+type SinksConfig struct {
+	LastFm *LastFmConfig `toml:"lastfm"`
+	CSV    *CSVConfig    `toml:"csv"`
 }
 
 type LastFmConfig struct {
@@ -43,11 +47,11 @@ type CSVConfig struct {
 func (c Config) Providers() []Provider {
 	providers := make([]Provider, 0)
 
-	if c.LastFm != nil {
-		providers = append(providers, c.LastFm)
+	if c.Sinks.LastFm != nil {
+		providers = append(providers, c.Sinks.LastFm)
 	}
-	if c.CSV != nil {
-		providers = append(providers, c.CSV)
+	if c.Sinks.CSV != nil {
+		providers = append(providers, c.Sinks.CSV)
 	}
 
 	return providers
@@ -105,8 +109,10 @@ func ReadConfig() (*Config, error) {
 			Regexes:             []RegexReplace{},
 			NotifyOnScrobble:    false,
 			NotifyOnError:       true,
-			LastFm:              nil,
-			CSV:                 nil,
+			Sinks: SinksConfig{
+				LastFm: nil,
+				CSV:    nil,
+			},
 		}
 
 		defaultMarshalled, err := toml.Marshal(defaultConfig)
@@ -161,7 +167,7 @@ func ReadConfig() (*Config, error) {
 		log.Warn().Msg("no scrobbling providers configured, this is probably not what you want")
 	}
 
-	if config.LastFm != nil && config.LastFm.SessionKey == "" {
+	if config.Sinks.LastFm != nil && config.Sinks.LastFm.SessionKey == "" {
 		log.Warn().Msg("last.fm provider is configured, but not authenticated: run goscrobble auth to generate a token")
 	}
 
