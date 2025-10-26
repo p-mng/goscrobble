@@ -23,14 +23,8 @@ func (s DBusSource) GetInfo(
 	playerBlacklist []*regexp.Regexp,
 	regexes []ParsedRegexReplace,
 ) (map[string]PlaybackStatus, error) {
-	conn, err := dbus.ConnectSessionBus()
-	if err != nil {
-		return nil, err
-	}
-	defer CloseDBus(conn)
-
 	var dbusNames []string
-	if err := conn.
+	if err := s.Conn.
 		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
 		Call("org.freedesktop.DBus.ListNames", 0).
 		Store(&dbusNames); err != nil {
@@ -47,7 +41,7 @@ func (s DBusSource) GetInfo(
 	playerPlaybackStatus := map[string]PlaybackStatus{}
 
 	for _, player := range playerNames {
-		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
+		playerObj := s.Conn.Object(player, "/org/mpris/MediaPlayer2")
 
 		metadata, err1 := GetDBusProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
 		status, err2 := GetDBusProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
