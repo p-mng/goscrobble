@@ -4,17 +4,29 @@
 
 ## Description
 
-`goscrobble` is a simple, cross-platform music scrobbler daemon using [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/)/[D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) on Linux and [ungive/media-control](https://github.com/ungive/media-control) on macOS.
+A simple, cross-platform music scrobbler daemon. Inspired by audio software like PulseAudio and PipeWire, it can be configured to connect different *sources* and *sinks*. Scrobbles are sent from one or more sources to one or more sinks.
+
+Supported sources:
+
+- [D-Bus (MPRIS2)](https://specifications.freedesktop.org/mpris-spec/latest/): works best on **Linux**
+- [media-control](https://github.com/ungive/media-control): works best on **macOS**
+
+Supported sinks:
+
+- **last.fm**: "the world's largest online music service"
+- **CSV**: a local file with comma-separated data
 
 > [!WARNING]
 > This project is still beta software. Features may break without warning (especially on macOS), scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
+>
+> This README refers to the `main` branch. To view the README for a specific version, check out the corresponding tagged commit.
 
 ## Features
 
 - **simple**: human-readable config file using [TOML](https://toml.io/en/)
-- **lightweight**: command line interface, no GUI, minimal dependencies, fewer lines of code than the alternatives listed below
-- **privacy-friendly**: no external services required, everything stays on your device (unless you use [last.fm](https://www.last.fm/))
-- **cross-platform**: currently works on Linux (MPRIS) and macOS (media-control)
+- **lightweight**: command line interface, no GUI, minimal dependencies, fewer lines of code than many of the alternatives listed below
+- **privacy-friendly**: no internet connection or external services required
+- **cross-platform**: currently works on Linux (MPRIS2/D-Bus) and macOS (media-control)
 - **multi-player support**: supports scrobbling from multiple players (e.g., YouTube Music and Spotify) at the same time (only supported on Linux)
 
 ## Configuration
@@ -37,33 +49,43 @@ blacklist = ["chromium", "firefox"]
 
 # regex match/replace
 [[regexes]]
-match = ' \([0-9]+ Remaster(ed)?\)'
-replace = ""
+match = ' - [0-9]+ Remaster(ed)?'
+replace = ''
 artist = false
-album = true
 track = true
+album = true
 
 [[regexes]]
 match = " - Radio Edit"
 replace = " (Radio Edit)"
 track = true
 
-# last.fm configuration
-[lastfm]
-key = "<API key>"
-secret = "<shared secret>"
-session_key = "<session key (automatically generated using `goscrobble auth`)>"
+[sources.dbus]
+# dbus address: if empty, connect to the session bus
+address = ''
 
-# local file configuration (deprecated, use csv instead)
-# [file]
-# filename = "<file to write scrobbles to>"
+[sources.media-control]
+# path to the 'media-control' binary
+command = 'media-control'
+# arguments, no need to change this
+arguments = ['get', '--now']
 
-# local CSV file configuration
-[csv]
-filename = "<file to write scrobbles to>"
+[sinks.lastfm]
+# last.fm API key
+key = 'last.fm API key'
+# last.fm API shared secret
+secret = 'last.fm API secret'
+# last.fm session key, automatically set by 'goscrobble lastfm-auth'
+session_key = ''
+# last.fm username, automatically set by 'goscrobble lastfm-auth'
+username = ''
+
+[sinks.csv]
+# filename to write scrobbles to, defaults to $HOME/scrobbles.csv
+filename = '/Users/patrick/scrobbles.csv'
 ```
 
-You can blacklist one or multiple players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS. The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
+You can blacklist one or more players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS. The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
 
 ## Installation
 
@@ -85,7 +107,7 @@ brew install media-control terminal-notifier
 
 ### Arch Linux
 
-Manually install the newest version from the [Arch User Repository](https://aur.archlinux.org/):
+Manually install the latest version from the [Arch User Repository](https://aur.archlinux.org/):
 
 ```shell
 git clone https://aur.archlinux.org/goscrobble.git
@@ -102,9 +124,9 @@ paru -S goscrobble
 ## Connect last.fm account
 
 1. [Create an API account](https://www.last.fm/api/account/create). Description, callback URL, and application homepage are not required.
-2. Create the `lastfm` section in your config file and enter the [newly generated](https://www.last.fm/api/accounts) API key and shared secret.
-3. Run `goscrobble auth`, and authenticate the application in your browser.
-4. Confirm the following prompt with `y`, the session key will be automatically written to your config file.
+2. Open the config file and insert the [newly generated API key and shared secret](https://www.last.fm/api/accounts).
+3. Run `goscrobble lastfm-auth`, and authenticate the application in your browser.
+4. Confirm the following prompt. The session key and last.fm username will be automatically written to your config file.
 
 ## Known issues
 
@@ -114,19 +136,18 @@ tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right 
 
 ## TODOs
 
-- Add more scrobbling providers (e.g., Maloja, LibreFM, Listenbrainz, etc.)
+- Add more scrobbling sinks (e.g., Maloja, LibreFM, ListenBrainz, etc.)
 - Add Microsoft Windows support
 - Test more Linux distros, macOS versions, and music players
-- Add unit tests
+- Add unit/integration tests
 
 ## Similar projects
 
-- [mariusor/mpris-scrobbler](https://github.com/mariusor/mpris-scrobbler): MPRIS scrobbler written in C
-- [InputUsername/rescrobbled](https://github.com/InputUsername/rescrobbled): MPRIS scrobbler written in Rust
-- [hrfee/go-scrobble](https://github.com/hrfee/go-scrobble): "ugly last.fm scrobbler" written in Go
-- [web-scrobbler/web-scrobbler](https://github.com/web-scrobbler/web-scrobbler): Browser scrobbler written in TypeScript
-
-I found all of the above to have different issues (e.g., [pausing breaks scrobbling](https://github.com/mariusor/mpris-scrobbler/issues/56) or [updates to the page layout preventing track detection](https://github.com/web-scrobbler/web-scrobbler/issues/4849)), so I decided to write my own scrobbler.
+- [FoxxMD/multi-scrobbler](https://github.com/FoxxMD/multi-scrobbler): scrobbler for multiple sources and clients (written in TypeScript)
+- [mariusor/mpris-scrobbler](https://github.com/mariusor/mpris-scrobbler): MPRIS scrobbler (written in C)
+- [InputUsername/rescrobbled](https://github.com/InputUsername/rescrobbled): MPRIS scrobbler (written in Rust)
+- [hrfee/go-scrobble](https://github.com/hrfee/go-scrobble): "ugly last.fm scrobbler" (written in Go)
+- [web-scrobbler/web-scrobbler](https://github.com/web-scrobbler/web-scrobbler): scrobbling browser extension (written in TypeScript)
 
 ## Contributing
 
