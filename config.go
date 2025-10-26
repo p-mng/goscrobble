@@ -97,7 +97,7 @@ func (c Config) GetSinks() []Sink {
 		sinks = append(sinks, c.Sinks.LastFm)
 	}
 	if c.Sinks.CSV != nil {
-		sinks = append(sinks, c.Sinks.CSV)
+		sinks = append(sinks, CSVSink{Filename: c.Sinks.CSV.Filename})
 	}
 
 	return sinks

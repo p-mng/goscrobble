@@ -7,18 +7,22 @@ import (
 	"time"
 )
 
-func (c *CSVConfig) Name() string {
+type CSVSink struct {
+	Filename string
+}
+
+func (s CSVSink) Name() string {
 	return "local CSV file"
 }
 
-func (c *CSVConfig) NowPlaying(_ PlaybackStatus) error {
+func (s CSVSink) NowPlaying(_ PlaybackStatus) error {
 	return nil
 }
 
-func (c *CSVConfig) Scrobble(p PlaybackStatus) error {
+func (s CSVSink) Scrobble(p PlaybackStatus) error {
 	var scrobbles [][]string
 
-	file, err := os.Open(c.Filename)
+	file, err := os.Open(s.Filename)
 	if err == nil {
 		defer CloseFile(file)
 
@@ -35,7 +39,7 @@ func (c *CSVConfig) Scrobble(p PlaybackStatus) error {
 		createRow(p.JoinArtists(), p.Track, p.Album, p.Duration, p.Timestamp),
 	)
 
-	newFile, err := os.Create(c.Filename)
+	newFile, err := os.Create(s.Filename)
 	if err != nil {
 		return err
 	}
