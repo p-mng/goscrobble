@@ -172,7 +172,7 @@ func sendNowPlaying(player string,
 		if config.NotifyOnError {
 			sendNotification(
 				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, sink.Name()),
-				fmt.Sprintf("error updating now playing status: <b>%s</b>", err.Error()),
+				fmt.Sprintf("error updating now playing status: %s", err.Error()),
 				uint32(0),
 			)
 		}
@@ -206,7 +206,7 @@ func sendScrobble(player string,
 		if config.NotifyOnError {
 			sendNotification(
 				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, sink.Name()),
-				fmt.Sprintf("error saving scrobble: <b>%s</b>", err.Error()),
+				fmt.Sprintf("error saving scrobble: %s", err.Error()),
 				uint32(0),
 			)
 		}
