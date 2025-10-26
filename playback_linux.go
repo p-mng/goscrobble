@@ -14,7 +14,7 @@ import (
 // https://specifications.freedesktop.org/mpris-spec/latest/
 func GetInfo(
 	playerBlacklist []*regexp.Regexp,
-	regexes []ParsedRegexEntry,
+	regexes []ParsedRegexReplace,
 ) (map[string]Info, error) {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {

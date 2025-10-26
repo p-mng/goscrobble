@@ -30,7 +30,7 @@ type mediaControlInfo struct {
 // https://github.com/ungive/mediaremote-adapter
 func GetInfo(
 	playerBlacklist []*regexp.Regexp,
-	regexes []ParsedRegexEntry,
+	regexes []ParsedRegexReplace,
 ) (map[string]Info, error) {
 	log.Debug().Msg("getting playback metadata using media-control")
 

@@ -30,7 +30,7 @@ func (p Info) JoinArtists() string {
 	return strings.Join(p.Artists, ", ")
 }
 
-type ParsedRegexEntry struct {
+type ParsedRegexReplace struct {
 	Match   *regexp.Regexp
 	Replace string
 	Artist  bool
@@ -59,7 +59,7 @@ func (p Info) Valid() bool {
 	}
 }
 
-func (p *Info) RegexReplace(regexes []ParsedRegexEntry) {
+func (p *Info) RegexReplace(regexes []ParsedRegexReplace) {
 	for _, r := range regexes {
 		log.Debug().
 			Str("expression", r.Match.String()).

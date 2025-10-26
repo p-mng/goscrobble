@@ -10,19 +10,19 @@ import (
 )
 
 type Config struct {
-	PollRate            int          `toml:"poll_rate"`
-	MinPlaybackDuration int64        `toml:"min_playback_duration"`
-	MinPlaybackPercent  int64        `toml:"min_playback_percent"`
-	NotifyOnScrobble    bool         `toml:"notify_on_scrobble"`
-	NotifyOnError       bool         `toml:"notify_on_error"`
-	Blacklist           []string     `toml:"blacklist"`
-	Regexes             []RegexEntry `toml:"regexes"`
+	PollRate            int            `toml:"poll_rate"`
+	MinPlaybackDuration int64          `toml:"min_playback_duration"`
+	MinPlaybackPercent  int64          `toml:"min_playback_percent"`
+	NotifyOnScrobble    bool           `toml:"notify_on_scrobble"`
+	NotifyOnError       bool           `toml:"notify_on_error"`
+	Blacklist           []string       `toml:"blacklist"`
+	Regexes             []RegexReplace `toml:"regexes"`
 
 	LastFm *LastFmConfig `toml:"lastfm"`
 	CSV    *CSVConfig    `toml:"csv"`
 }
 
-type RegexEntry struct {
+type RegexReplace struct {
 	Match   string `toml:"match"`
 	Replace string `toml:"replace"`
 	Artist  bool   `toml:"artist"`
@@ -53,8 +53,8 @@ func (c Config) Providers() []Provider {
 	return providers
 }
 
-func (c Config) ParseRegexes() []ParsedRegexEntry {
-	var parsed []ParsedRegexEntry
+func (c Config) ParseRegexes() []ParsedRegexReplace {
+	var parsed []ParsedRegexReplace
 
 	for _, r := range c.Regexes {
 		match, err := regexp.Compile(r.Match)
@@ -65,7 +65,7 @@ func (c Config) ParseRegexes() []ParsedRegexEntry {
 				Msg("error compiling match/repalce expression")
 			continue
 		}
-		parsed = append(parsed, ParsedRegexEntry{
+		parsed = append(parsed, ParsedRegexReplace{
 			Match:   match,
 			Replace: r.Replace,
 			Artist:  r.Artist,
@@ -102,7 +102,7 @@ func ReadConfig() (*Config, error) {
 			MinPlaybackDuration: 4 * 60,
 			MinPlaybackPercent:  50,
 			Blacklist:           []string{},
-			Regexes:             []RegexEntry{},
+			Regexes:             []RegexReplace{},
 			NotifyOnScrobble:    false,
 			NotifyOnError:       true,
 			LastFm:              nil,
