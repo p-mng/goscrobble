@@ -54,6 +54,7 @@ type LastFmConfig struct {
 	Key        string `toml:"key"`
 	Secret     string `toml:"secret"`
 	SessionKey string `toml:"session_key"`
+	Username   string `toml:"username"`
 }
 
 type CSVConfig struct {
@@ -94,7 +95,12 @@ func (c Config) GetSinks() []Sink {
 	var sinks []Sink
 
 	if c.Sinks.LastFm != nil {
-		sinks = append(sinks, c.Sinks.LastFm)
+		sink, err := LastFmSinkFromConfig(*c.Sinks.LastFm)
+		if err != nil {
+			log.Error().Err(err).Msg("error setting up last.fm sink")
+		} else {
+			sinks = append(sinks, sink)
+		}
 	}
 	if c.Sinks.CSV != nil {
 		sinks = append(sinks, CSVSink{Filename: c.Sinks.CSV.Filename})
@@ -182,7 +188,7 @@ func CreateDefaultConfig(filename string) (Config, error) {
 			MediaControl: &MediaControlConfig{Command: "media-control", Arguments: []string{"get", "--now"}},
 		},
 		Sinks: SinksConfig{
-			LastFm: &LastFmConfig{Key: "last.fm API key", Secret: "last.fm API secret", SessionKey: ""},
+			LastFm: &LastFmConfig{Key: "last.fm API key", Secret: "last.fm API secret", SessionKey: "", Username: ""},
 			CSV:    &CSVConfig{Filename: fmt.Sprintf("%s/scrobbles.csv", os.Getenv("HOME"))},
 		},
 	}

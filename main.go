@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"strings"
 
+	lastfm "github.com/p-mng/lastfm-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/shkh/lastfm-go/lastfm"
 	"github.com/urfave/cli/v3"
 )
 
@@ -71,33 +71,37 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 
 	config, err := ReadConfig()
 	if err != nil {
-		log.Error().Err(err).Msg("error reading config file")
+		fmt.Println("Error reading config file:", err.Error())
 		return nil
 	}
 
-	if config.Sinks.LastFm == nil || config.Sinks.LastFm.Key == "" || config.Sinks.LastFm.Secret == "" {
-		log.Error().Msg("last.fm sink is not configured")
+	if config.Sinks.LastFm == nil {
+		fmt.Println("Error: last.fm sink is not configured")
 		return nil
 	}
 
-	api := lastfm.New(config.Sinks.LastFm.Key, config.Sinks.LastFm.Secret)
-
-	token, err := api.GetToken()
+	client, err := lastfm.NewDesktopClient(lastfm.BaseURL, config.Sinks.LastFm.Key, config.Sinks.LastFm.Secret)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to generate last.fm request token")
+		fmt.Println("Error setting up last.fm client:", err.Error())
 		return nil
 	}
 
-	authURL := api.GetAuthTokenUrl(token)
+	token, err := client.AuthGetToken()
+	if err != nil {
+		fmt.Println("Error getting authorization token:", err.Error())
+		return nil
+	}
+
+	authURL := client.DesktopAuthorizationURL(token.Token)
 
 	//nolint:gosec
 	openBrowserCmd := exec.Command("/usr/bin/env", "xdg-open", authURL)
 	if err := openBrowserCmd.Run(); err != nil {
-		log.Warn().Err(err).Msg("failed to open auth URL in web browser")
+		fmt.Println("Error opening URL in default browser:", err.Error())
 	}
 
-	fmt.Println("please open the following URL in your browser and authorize the application:", authURL)
-	fmt.Print("finished authorization? [Y/n] ")
+	fmt.Println("Please open the following URL in your browser and authorize the application:", authURL)
+	fmt.Print("Finished authorization? [Y/n] ")
 
 	input := bufio.NewScanner(os.Stdin)
 	input.Scan()
@@ -107,14 +111,16 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	if err := api.LoginWithToken(token); err != nil {
-		log.Error().Err(err).Msg("failed to authenticate using request token")
+	session, err := client.AuthGetSession(token.Token)
+	if err != nil {
+		fmt.Println("Error fetching session key from last.fm API:", err.Error())
 		return nil
 	}
 
-	sessionKey := api.GetSessionKey()
+	fmt.Println("Logged in with user:", session.Session.Name)
 
-	config.Sinks.LastFm.SessionKey = sessionKey
+	config.Sinks.LastFm.SessionKey = session.Session.Key
+	config.Sinks.LastFm.Username = session.Session.Name
 
 	if err := config.WriteConfig(); err != nil {
 		log.Error().Err(err).Msg("failed to write updated config file")
