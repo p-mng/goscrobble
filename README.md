@@ -72,7 +72,7 @@ You can blacklist one or multiple players using Go [regular expressions](https:/
 Using the provided install script:
 
 ```shell
-curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/install.sh | bash
+curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/scripts/install.sh | bash
 ```
 
 Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=dev`).

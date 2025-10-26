@@ -48,12 +48,12 @@ if [[ "$(uname -s)" = "Darwin" ]]; then
 	echo "installing macOS launch daemon"
 
 	mkdir -p "$HOME/Library/LaunchAgents"
-	curl "$url_prefix/io.github.p-mng.goscrobble.plist" | envsubst >"$HOME/Library/LaunchAgents/io.github.p-mng.goscrobble.plist"
+	curl "$url_prefix/scripts/io.github.p-mng.goscrobble.plist" | envsubst >"$HOME/Library/LaunchAgents/io.github.p-mng.goscrobble.plist"
 elif [[ "$(uname -s)" = "Linux" ]]; then
 	echo "installing systemd user service"
 
 	mkdir -p "$HOME/.config/systemd/user"
-	curl "$url_prefix/goscrobble.service" | envsubst >"$HOME/.config/systemd/user/goscrobble.service"
+	curl "$url_prefix/scripts/goscrobble.service" | envsubst >"$HOME/.config/systemd/user/goscrobble.service"
 else
 	echo "unsupported platform: $(uname -s)"
 	echo "please create a daemon manually according to your system's manual"
