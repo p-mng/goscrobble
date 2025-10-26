@@ -5,12 +5,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// https://specifications.freedesktop.org/icon-naming-spec/latest/
-const (
-	IconSyncError    = "sync-error"
-	IconSyncronizing = "sync-synchronizing"
-)
-
 // https://dbus.freedesktop.org/doc/dbus-specification.html
 // https://specifications.freedesktop.org/notification-spec/1.3/
 func SendNotification(
