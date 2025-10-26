@@ -116,8 +116,8 @@ func RunMainLoop(config Config) {
 					)
 				}
 
-				for _, provider := range config.Providers() {
-					sendNowPlaying(player, provider, status, config)
+				for _, sink := range config.GetSinks() {
+					sendNowPlaying(player, sink, status, config)
 				}
 
 				continue
@@ -144,34 +144,34 @@ func RunMainLoop(config Config) {
 
 			scrobbledPrevious[player] = true
 
-			for _, provider := range config.Providers() {
-				sendScrobble(player, provider, status, config)
+			for _, sink := range config.GetSinks() {
+				sendScrobble(player, sink, status, config)
 			}
 		}
 	}
 }
 
 func sendNowPlaying(player string,
-	provider Provider,
+	sink Sink,
 	status PlaybackStatus,
 	config Config,
 ) {
 	log.Debug().
 		Str("player", player).
-		Str("provider", provider.Name()).
+		Str("sink", sink.Name()).
 		Interface("status", status).
 		Msg("updating now playing status")
-	if err := provider.NowPlaying(status); err != nil {
+	if err := sink.NowPlaying(status); err != nil {
 		log.Error().
 			Str("player", player).
-			Str("provider", provider.Name()).
+			Str("sink", sink.Name()).
 			Interface("status", status).
 			Err(err).
 			Msg("error updating now playing status")
 
 		if config.NotifyOnError {
 			sendNotification(
-				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, provider.Name()),
+				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error updating now playing status: <b>%s</b>", err.Error()),
 				uint32(0),
 			)
@@ -179,33 +179,33 @@ func sendNowPlaying(player string,
 	} else {
 		log.Debug().
 			Str("player", player).
-			Str("provider", provider.Name()).
+			Str("sink", sink.Name()).
 			Interface("status", status).
 			Msg("updated now playing status")
 	}
 }
 
 func sendScrobble(player string,
-	provider Provider,
+	sink Sink,
 	status PlaybackStatus,
 	config Config,
 ) {
 	log.Debug().
 		Str("player", player).
-		Str("provider", provider.Name()).
+		Str("sink", sink.Name()).
 		Interface("status", status).
 		Msg("saving scrobble")
-	if err := provider.Scrobble(status); err != nil {
+	if err := sink.Scrobble(status); err != nil {
 		log.Error().
 			Str("player", player).
-			Str("provider", provider.Name()).
+			Str("sink", sink.Name()).
 			Interface("status", status).
 			Err(err).
 			Msg("error saving scrobble")
 
 		if config.NotifyOnError {
 			sendNotification(
-				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, provider.Name()),
+				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error saving scrobble: <b>%s</b>", err.Error()),
 				uint32(0),
 			)
@@ -213,7 +213,7 @@ func sendScrobble(player string,
 	} else {
 		log.Info().
 			Str("player", player).
-			Str("provider", provider.Name()).
+			Str("sink", sink.Name()).
 			Interface("status", status).
 			Msg("saved scrobble")
 	}

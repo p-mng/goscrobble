@@ -1,6 +1,6 @@
 package main
 
-type Provider interface {
+type Sink interface {
 	Name() string
 	NowPlaying(PlaybackStatus) error
 	Scrobble(PlaybackStatus) error

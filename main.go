@@ -35,7 +35,7 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:   "run",
-				Usage:  "Continuously checks music players and sends scrobbles to configured providers",
+				Usage:  "Continuously checks music players and sends scrobbles to configured sinks",
 				Action: cmdRun,
 			},
 			{
@@ -76,7 +76,7 @@ func cmdAuth(_ context.Context, cmd *cli.Command) error {
 	}
 
 	if config.Sinks.LastFm == nil || config.Sinks.LastFm.Key == "" || config.Sinks.LastFm.Secret == "" {
-		log.Error().Msg("last.fm provider is not configured")
+		log.Error().Msg("last.fm sink is not configured")
 		return nil
 	}
 

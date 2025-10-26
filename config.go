@@ -90,17 +90,17 @@ func (c Config) GetSources() []Source {
 	return sources
 }
 
-func (c Config) Providers() []Provider {
-	providers := make([]Provider, 0)
+func (c Config) GetSinks() []Sink {
+	var sinks []Sink
 
 	if c.Sinks.LastFm != nil {
-		providers = append(providers, c.Sinks.LastFm)
+		sinks = append(sinks, c.Sinks.LastFm)
 	}
 	if c.Sinks.CSV != nil {
-		providers = append(providers, c.Sinks.CSV)
+		sinks = append(sinks, c.Sinks.CSV)
 	}
 
-	return providers
+	return sinks
 }
 
 func (c Config) ParseRegexes() []ParsedRegexReplace {
@@ -223,11 +223,11 @@ func (c *Config) Validate() {
 	if !c.NotifyOnError {
 		log.Warn().Msg("goscrobble will not send desktop notifications on failed scrobbles")
 	}
-	if len(c.Providers()) == 0 {
-		log.Warn().Msg("no scrobbling providers configured, this is probably not what you want")
+	if len(c.GetSinks()) == 0 {
+		log.Warn().Msg("no scrobbling sinks configured, this is probably not what you want")
 	}
 	if c.Sinks.LastFm != nil && c.Sinks.LastFm.SessionKey == "" {
-		log.Warn().Msg("last.fm provider is configured, but not authenticated: run goscrobble auth to generate a token")
+		log.Warn().Msg("last.fm sink is configured, but not authenticated: run goscrobble auth to generate a token")
 	}
 }
 

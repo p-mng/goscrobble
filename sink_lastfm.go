@@ -7,7 +7,7 @@ import (
 	"github.com/shkh/lastfm-go/lastfm"
 )
 
-const ErrLastFmNotAuthenticated = "last.fm provider is configured, but not authenticated"
+const ErrLastFmNotAuthenticated = "last.fm sink is configured, but not authenticated"
 
 var lastFm *lastfm.Api
 
