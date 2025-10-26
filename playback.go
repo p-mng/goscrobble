@@ -22,8 +22,8 @@ type PlaybackStatus struct {
 	Duration  int64
 	Timestamp int64
 
-	PlaybackStatus string
-	Position       int64
+	Status   string
+	Position int64
 }
 
 func (p PlaybackStatus) JoinArtists() string {

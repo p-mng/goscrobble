@@ -5,6 +5,7 @@ import (
 	"os"
 	"regexp"
 
+	"github.com/godbus/dbus/v5"
 	"github.com/pelletier/go-toml/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -57,6 +58,36 @@ type LastFmConfig struct {
 
 type CSVConfig struct {
 	Filename string `toml:"filename"`
+}
+
+func (c Config) GetSources() []Source {
+	sources := make([]Source, 0)
+
+	if c.Sources.DBus != nil {
+		var conn *dbus.Conn
+		var err error
+		if c.Sources.DBus.Address == "" {
+			conn, err = dbus.ConnectSessionBus()
+		} else {
+			conn, err = dbus.Connect(c.Sources.DBus.Address)
+		}
+
+		if err != nil {
+			log.Error().
+				Err(err).
+				Str("address", c.Sources.DBus.Address).
+				Msg("failed to connect to session bus")
+		}
+		sources = append(sources, DBusSource{Conn: conn})
+	}
+	if c.Sources.MediaControl != nil {
+		sources = append(sources, MediaControlSource{
+			Command:   c.Sources.MediaControl.Command,
+			Arguments: c.Sources.MediaControl.Arguments,
+		})
+	}
+
+	return sources
 }
 
 func (c Config) Providers() []Provider {

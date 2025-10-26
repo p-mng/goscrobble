@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"regexp"
 	"time"
 
@@ -50,10 +51,14 @@ func RunMainLoop(config Config) {
 			Msg("waiting for next poll")
 		time.Sleep(time.Second * time.Duration(config.PollRate))
 
-		playbackStatus, err := GetInfo(playerBlacklist, parsedRegexes)
-		if err != nil {
-			log.Error().Err(err).Msg("failed to get current playback status")
-			continue
+		playbackStatus := make(map[string]PlaybackStatus)
+
+		for _, source := range config.GetSources() {
+			status, err := source.GetInfo(playerBlacklist, parsedRegexes)
+			if err != nil {
+				log.Error().Err(err).Str("source", source.Name()).Msg("error getting current playback status")
+			}
+			maps.Copy(playbackStatus, status)
 		}
 
 		for player := range playbackStatus {
@@ -120,7 +125,7 @@ func RunMainLoop(config Config) {
 
 			status.Timestamp = previouslyPlaying[player].Timestamp
 
-			if status.Position < minPlayTime || status.PlaybackStatus != PlaybackPlaying || scrobbledPrevious[player] {
+			if status.Position < minPlayTime || status.Status != PlaybackPlaying || scrobbledPrevious[player] {
 				continue
 			}
 
