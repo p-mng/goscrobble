@@ -7,6 +7,7 @@ format:
 
 lint:
     golangci-lint run
+    shellcheck scripts/alpine-dependencies.sh
     shellcheck scripts/install.sh
 
 test:
