@@ -45,6 +45,10 @@ func RunMainLoop(config Config) {
 	parsedRegexes := config.ParseRegexes()
 	log.Debug().Msg("parsed match/replace expressions")
 
+	sources := config.GetSources()
+	sinks := config.GetSinks()
+	log.Debug().Msg("set up sources and sinks")
+
 	for {
 		log.Debug().
 			Dur("duration", time.Duration(config.PollRate)).
@@ -53,7 +57,7 @@ func RunMainLoop(config Config) {
 
 		playbackStatus := make(map[string]PlaybackStatus)
 
-		for _, source := range config.GetSources() {
+		for _, source := range sources {
 			status, err := source.GetInfo(playerBlacklist, parsedRegexes)
 			if err != nil {
 				log.Error().Err(err).Str("source", source.Name()).Msg("error getting current playback status")
@@ -116,7 +120,7 @@ func RunMainLoop(config Config) {
 					)
 				}
 
-				for _, sink := range config.GetSinks() {
+				for _, sink := range sinks {
 					sendNowPlaying(player, sink, status, config)
 				}
 
@@ -144,7 +148,7 @@ func RunMainLoop(config Config) {
 
 			scrobbledPrevious[player] = true
 
-			for _, sink := range config.GetSinks() {
+			for _, sink := range sinks {
 				sendScrobble(player, sink, status, config)
 			}
 		}
