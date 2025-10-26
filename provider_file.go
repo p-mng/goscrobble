@@ -7,18 +7,17 @@ import (
 	"strings"
 
 	"github.com/p-mng/goscrobble/close"
-	"github.com/p-mng/goscrobble/playback"
 )
 
 func (f *FileConfig) Name() string {
 	return "local file"
 }
 
-func (f *FileConfig) NowPlaying(_ playback.Info) error {
+func (f *FileConfig) NowPlaying(_ Info) error {
 	return nil
 }
 
-func (f *FileConfig) Scrobble(n playback.Info) error {
+func (f *FileConfig) Scrobble(n Info) error {
 	// https://pkg.go.dev/os#pkg-constants
 	file, err := os.OpenFile(f.Filename, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0600)
 	if err != nil {

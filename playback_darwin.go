@@ -1,4 +1,4 @@
-package playback
+package main
 
 import (
 	"encoding/json"

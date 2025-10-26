@@ -1,4 +1,4 @@
-package playback
+package main
 
 import (
 	"errors"
@@ -67,7 +67,7 @@ func GetInfo(
 			continue
 		}
 
-		playbackInfo :=  Info{
+		playbackInfo := Info{
 			Artists:        *artists,
 			Track:          *track,
 			Album:          *album,

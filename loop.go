@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/p-mng/goscrobble/notify"
-	"github.com/p-mng/goscrobble/playback"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,7 +21,7 @@ const (
 func RunMainLoop(config *Config) {
 	log.Debug().Msg("started main loop")
 
-	previouslyPlaying := map[string]playback.Info{}
+	previouslyPlaying := map[string]Info{}
 	scrobbledPrevious := map[string]bool{}
 
 	var playerBlacklist []*regexp.Regexp
@@ -52,7 +51,7 @@ func RunMainLoop(config *Config) {
 			Msg("waiting for next poll")
 		time.Sleep(time.Second * time.Duration(config.PollRate))
 
-		playbackInfo, err := playback.GetInfo(playerBlacklist, parsedRegexes)
+		playbackInfo, err := GetInfo(playerBlacklist, parsedRegexes)
 		if err != nil {
 			log.Error().Err(err).Msg("failed to get current playback status")
 			continue
@@ -63,7 +62,7 @@ func RunMainLoop(config *Config) {
 				log.Info().
 					Str("player", player).
 					Msg("new player found")
-				previouslyPlaying[player] = playback.Info{}
+				previouslyPlaying[player] = Info{}
 				scrobbledPrevious[player] = false
 			}
 		}
@@ -122,7 +121,7 @@ func RunMainLoop(config *Config) {
 
 			status.Timestamp = previouslyPlaying[player].Timestamp
 
-			if status.Position < minPlayTime || status.PlaybackStatus != playback.PlaybackPlaying || scrobbledPrevious[player] {
+			if status.Position < minPlayTime || status.PlaybackStatus != PlaybackPlaying || scrobbledPrevious[player] {
 				continue
 			}
 
@@ -150,7 +149,7 @@ func RunMainLoop(config *Config) {
 
 func sendNowPlaying(player string,
 	provider Provider,
-	status playback.Info,
+	status Info,
 	config *Config,
 ) {
 	log.Debug().
@@ -184,7 +183,7 @@ func sendNowPlaying(player string,
 
 func sendScrobble(player string,
 	provider Provider,
-	status playback.Info,
+	status Info,
 	config *Config,
 ) {
 	log.Debug().
@@ -216,7 +215,7 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(playbackInfo playback.Info, config *Config) (int64, error) {
+func minPlayTime(playbackInfo Info, config *Config) (int64, error) {
 	if playbackInfo.Duration < 0 {
 		return 0, fmt.Errorf("invalid track length: %d", playbackInfo.Duration)
 	}
