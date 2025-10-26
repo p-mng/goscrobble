@@ -18,7 +18,8 @@ type Config struct {
 	Blacklist           []string       `toml:"blacklist"`
 	Regexes             []RegexReplace `toml:"regexes"`
 
-	Sinks SinksConfig `toml:"sinks"`
+	Sources SourcesConfig `toml:"sources"`
+	Sinks   SinksConfig   `toml:"sinks"`
 }
 
 type RegexReplace struct {
@@ -29,9 +30,23 @@ type RegexReplace struct {
 	Album   bool   `toml:"album"`
 }
 
+type SourcesConfig struct {
+	DBus         *DBusConfig         `toml:"dbus"`
+	MediaControl *MediaControlConfig `toml:"media-control"`
+}
+
 type SinksConfig struct {
 	LastFm *LastFmConfig `toml:"lastfm"`
 	CSV    *CSVConfig    `toml:"csv"`
+}
+
+type DBusConfig struct {
+	Address string `toml:"address"`
+}
+
+type MediaControlConfig struct {
+	Command   string   `toml:"command"`
+	Arguments []string `toml:"arguments"`
 }
 
 type LastFmConfig struct {
