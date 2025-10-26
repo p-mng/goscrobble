@@ -38,7 +38,7 @@ func (s DBusSource) GetInfo(
 
 	var playerNames []string
 	for _, name := range dbusNames {
-		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !isBlacklisted(playerBlacklist, name) {
+		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !IsBlacklisted(playerBlacklist, name) {
 			playerNames = append(playerNames, name)
 		}
 	}
@@ -48,9 +48,9 @@ func (s DBusSource) GetInfo(
 	for _, player := range playerNames {
 		playerObj := conn.Object(player, "/org/mpris/MediaPlayer2")
 
-		metadata, err1 := getProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
-		status, err2 := getProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
-		position, err3 := getProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
+		metadata, err1 := GetDBusProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
+		status, err2 := GetDBusProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
+		position, err3 := GetDBusProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
 
 		if err := errors.Join(err1, err2, err3); err != nil {
 			log.Error().
@@ -60,10 +60,10 @@ func (s DBusSource) GetInfo(
 			continue
 		}
 
-		artists, err1 := getMapEntry[[]string](*metadata, "xesam:artist")
-		track, err2 := getMapEntry[string](*metadata, "xesam:title")
-		album, err3 := getMapEntry[string](*metadata, "xesam:album")
-		duration, err4 := getMapEntry[int64](*metadata, "mpris:length")
+		artists, err1 := GetDBusMapEntry[[]string](*metadata, "xesam:artist")
+		track, err2 := GetDBusMapEntry[string](*metadata, "xesam:title")
+		album, err3 := GetDBusMapEntry[string](*metadata, "xesam:album")
+		duration, err4 := GetDBusMapEntry[int64](*metadata, "mpris:length")
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
 			log.Warn().
@@ -91,7 +91,7 @@ func (s DBusSource) GetInfo(
 	return playerPlaybackStatus, nil
 }
 
-func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {
+func GetDBusProperty[E any](obj dbus.BusObject, property string) (*E, error) {
 	value, err := obj.GetProperty(property)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get property: %v", err)
@@ -103,7 +103,7 @@ func getProperty[E any](obj dbus.BusObject, property string) (*E, error) {
 	return nil, errors.New("failed to read property from DBus object")
 }
 
-func getMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error) {
+func GetDBusMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error) {
 	value, ok := metadata[key]
 	if !ok {
 		return nil, fmt.Errorf("map entry with key %s not found", key)

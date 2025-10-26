@@ -44,7 +44,7 @@ func (p PlaybackStatus) Equals(other PlaybackStatus) bool {
 		p.Album == other.Album
 }
 
-func (p PlaybackStatus) Valid() bool {
+func (p PlaybackStatus) IsValid() bool {
 	switch {
 	case p.Album == "":
 		return false
@@ -83,7 +83,7 @@ func (p *PlaybackStatus) RegexReplace(regexes []ParsedRegexReplace) {
 	}
 }
 
-func isBlacklisted(blacklist []*regexp.Regexp, player string) bool {
+func IsBlacklisted(blacklist []*regexp.Regexp, player string) bool {
 	for _, re := range blacklist {
 		if re.MatchString(player) {
 			return true

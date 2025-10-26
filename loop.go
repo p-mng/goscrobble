@@ -82,7 +82,7 @@ func RunMainLoop(config Config) {
 		}
 
 		for player, status := range playbackStatus {
-			if !status.Valid() {
+			if !status.IsValid() {
 				continue
 			}
 

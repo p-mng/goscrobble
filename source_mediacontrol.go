@@ -41,7 +41,7 @@ func (s MediaControlSource) GetInfo(
 		return map[string]PlaybackStatus{}, nil
 	}
 
-	if isBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
+	if IsBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
 		return map[string]PlaybackStatus{}, nil
 	}
 
