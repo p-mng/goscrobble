@@ -15,36 +15,24 @@ func (c *CSVConfig) NowPlaying(_ Info) error {
 }
 
 func (c *CSVConfig) Scrobble(n Info) error {
-	readExisting := true
-
-	file, err := os.Open(c.Filename)
-	if os.IsNotExist(err) {
-		readExisting = false
-	} else if err != nil {
-		return err
-	}
-
 	var scrobbles [][]string
 
-	if readExisting {
+	file, err := os.Open(c.Filename)
+	if err == nil {
 		defer CloseFile(file)
 
-		readScrobbles, err := csv.NewReader(file).ReadAll()
+		scrobbles, err = csv.NewReader(file).ReadAll()
 		if err != nil {
 			return err
 		}
-
-		readScrobbles = append(
-			readScrobbles,
-			createRow(n.JoinArtists(), n.Track, n.Album, n.Duration, n.Timestamp),
-		)
-		scrobbles = readScrobbles
-	} else {
-		scrobbles = append(
-			scrobbles,
-			createRow(n.JoinArtists(), n.Track, n.Album, n.Duration, n.Timestamp),
-		)
+	} else if !os.IsNotExist(err) {
+		return err
 	}
+
+	scrobbles = append(
+		scrobbles,
+		createRow(n.JoinArtists(), n.Track, n.Album, n.Duration, n.Timestamp),
+	)
 
 	newFile, err := os.Create(c.Filename)
 	if err != nil {
