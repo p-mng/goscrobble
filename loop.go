@@ -17,7 +17,7 @@ const (
 	RuneWarningSign          = '\u26A0'
 )
 
-func RunMainLoop(config *Config) {
+func RunMainLoop(config Config) {
 	log.Debug().Msg("started main loop")
 
 	previouslyPlaying := map[string]PlaybackStatus{}
@@ -149,7 +149,7 @@ func RunMainLoop(config *Config) {
 func sendNowPlaying(player string,
 	provider Provider,
 	status PlaybackStatus,
-	config *Config,
+	config Config,
 ) {
 	log.Debug().
 		Str("player", player).
@@ -183,7 +183,7 @@ func sendNowPlaying(player string,
 func sendScrobble(player string,
 	provider Provider,
 	status PlaybackStatus,
-	config *Config,
+	config Config,
 ) {
 	log.Debug().
 		Str("player", player).
@@ -214,7 +214,7 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(status PlaybackStatus, config *Config) (int64, error) {
+func minPlayTime(status PlaybackStatus, config Config) (int64, error) {
 	if status.Duration < 0 {
 		return 0, fmt.Errorf("invalid track length: %d", status.Duration)
 	}
