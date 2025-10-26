@@ -244,18 +244,11 @@ func (c Config) WriteConfig() error {
 }
 
 func ConfigDir() string {
-	// https://wiki.archlinux.org/title/XDG_Base_Directory
+	// https://specifications.freedesktop.org/basedir-spec/latest/
 	xdgConfigHome := os.Getenv("XDG_CONFIG_HOME")
 	if xdgConfigHome != "" {
 		return fmt.Sprintf("%s/goscrobble", xdgConfigHome)
 	}
 
-	home := os.Getenv("HOME")
-	if home == "" {
-		// $HOME environment variable is required to be set at all times
-		// https://unix.stackexchange.com/a/123859
-		panic("HOME environment variable is not set")
-	}
-
-	return fmt.Sprintf("%s/.config/goscrobble", home)
+	return fmt.Sprintf("%s/.config/goscrobble", os.Getenv("HOME"))
 }
