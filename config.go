@@ -19,7 +19,6 @@ type Config struct {
 	Regexes             []RegexEntry `toml:"regexes"`
 
 	LastFm *LastFmConfig `toml:"lastfm"`
-	File   *FileConfig   `toml:"file"`
 	CSV    *CSVConfig    `toml:"csv"`
 }
 
@@ -37,10 +36,6 @@ type LastFmConfig struct {
 	SessionKey string `toml:"session_key"`
 }
 
-type FileConfig struct {
-	Filename string `toml:"filename"`
-}
-
 type CSVConfig struct {
 	Filename string `toml:"filename"`
 }
@@ -50,9 +45,6 @@ func (c Config) Providers() []Provider {
 
 	if c.LastFm != nil {
 		providers = append(providers, c.LastFm)
-	}
-	if c.File != nil {
-		providers = append(providers, c.File)
 	}
 	if c.CSV != nil {
 		providers = append(providers, c.CSV)
@@ -114,7 +106,6 @@ func ReadConfig() (*Config, error) {
 			NotifyOnScrobble:    false,
 			NotifyOnError:       true,
 			LastFm:              nil,
-			File:                nil,
 			CSV:                 nil,
 		}
 
