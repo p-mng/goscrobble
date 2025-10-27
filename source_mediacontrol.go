@@ -25,7 +25,8 @@ func (s MediaControlSource) GetInfo(
 ) (map[string]PlaybackStatus, error) {
 	log.Debug().Msg("getting playback metadata using media-control")
 
-	cmd := exec.Command("/usr/bin/env", "media-control", "get", "--now")
+	//nolint:gosec
+	cmd := exec.Command(s.Command, s.Arguments...)
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, err
