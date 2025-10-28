@@ -65,6 +65,8 @@ func (c Config) GetSources() []Source {
 	var sources []Source
 
 	if c.Sources.DBus != nil {
+		log.Debug().Msg("setting up dbus source")
+
 		var conn *dbus.Conn
 		var err error
 		if c.Sources.DBus.Address == "" {
@@ -84,6 +86,7 @@ func (c Config) GetSources() []Source {
 	}
 
 	if c.Sources.MediaControl != nil {
+		log.Debug().Msg("setting up media-control source")
 		sources = append(sources, MediaControlSource{
 			Command:   c.Sources.MediaControl.Command,
 			Arguments: c.Sources.MediaControl.Arguments,
@@ -97,6 +100,8 @@ func (c Config) GetSinks() []Sink {
 	var sinks []Sink
 
 	if c.Sinks.LastFm != nil {
+		log.Debug().Msg("setting up last.fm sink")
+
 		sink, err := LastFmSinkFromConfig(*c.Sinks.LastFm)
 		if err != nil {
 			log.Error().Err(err).Msg("error setting up last.fm sink")
@@ -106,6 +111,7 @@ func (c Config) GetSinks() []Sink {
 	}
 
 	if c.Sinks.CSV != nil {
+		log.Debug().Msg("setting up CSV sink")
 		sinks = append(sinks, CSVSink{Filename: c.Sinks.CSV.Filename})
 	}
 
@@ -137,8 +143,15 @@ func (c Config) ParseRegexes() []ParsedRegexReplace {
 }
 
 func ReadConfig() (Config, error) {
+	log.Debug().Msg("reading config")
+
 	configDir := ConfigDir()
-	if err := os.MkdirAll(configDir, 0700); err != nil && !os.IsExist(err) {
+	log.Debug().Str("config dir", configDir).Msg("creating config directory")
+
+	err := os.MkdirAll(configDir, 0700)
+	if os.IsExist(err) {
+		log.Debug().Str("config dir", configDir).Msg("config directory already exists")
+	} else if err != nil {
 		return Config{}, fmt.Errorf("failed to create config directory: %w", err)
 	}
 
@@ -163,6 +176,7 @@ func ReadConfig() (Config, error) {
 		return Config{}, configErr
 	}
 
+	log.Debug().Msg("validating config")
 	config.Validate()
 
 	return config, nil
