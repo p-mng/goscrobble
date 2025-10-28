@@ -62,7 +62,7 @@ type CSVConfig struct {
 }
 
 func (c Config) GetSources() []Source {
-	sources := make([]Source, 0)
+	var sources []Source
 
 	if c.Sources.DBus != nil {
 		var conn *dbus.Conn
@@ -77,10 +77,12 @@ func (c Config) GetSources() []Source {
 			log.Error().
 				Err(err).
 				Str("address", c.Sources.DBus.Address).
-				Msg("failed to connect to session bus")
+				Msg("failed to connect to bus")
+		} else {
+			sources = append(sources, DBusSource{Conn: conn})
 		}
-		sources = append(sources, DBusSource{Conn: conn})
 	}
+
 	if c.Sources.MediaControl != nil {
 		sources = append(sources, MediaControlSource{
 			Command:   c.Sources.MediaControl.Command,
@@ -102,6 +104,7 @@ func (c Config) GetSinks() []Sink {
 			sinks = append(sinks, sink)
 		}
 	}
+
 	if c.Sinks.CSV != nil {
 		sinks = append(sinks, CSVSink{Filename: c.Sinks.CSV.Filename})
 	}
