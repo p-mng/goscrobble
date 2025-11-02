@@ -5,8 +5,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// https://dbus.freedesktop.org/doc/dbus-specification.html
-// https://specifications.freedesktop.org/notification-spec/1.3/
 func SendNotification(
 	replacesID uint32,
 	summary,
@@ -18,16 +16,8 @@ func SendNotification(
 	}
 	defer CloseDBus(conn)
 
-	args := []any{
-		"goscrobble",
-		replacesID,
-		"",
-		summary,
-		body,
-		[]string{},
-		map[string]dbus.Variant{},
-		int32(-1),
-	}
+	// https://specifications.freedesktop.org/notification/1.3/basic-design.html#id-1.3.6
+	args := []any{"goscrobble", replacesID, "", summary, body, []string{}, map[string]dbus.Variant{}, int32(-1)}
 
 	log.Debug().
 		Interface("notification", args).

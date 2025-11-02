@@ -6,12 +6,25 @@ import (
 	lastfm "github.com/p-mng/lastfm-go"
 )
 
-const ErrLastFmNotAuthenticated = "last.fm sink is configured, but not authenticated"
-
 type LastFmSink struct {
 	Client     lastfm.Client
 	SessionKey string
 	Username   string
+}
+
+func LastFmSinkFromConfig(c LastFmConfig) (LastFmSink, error) {
+	var sink LastFmSink
+
+	if c.SessionKey == "" || c.Username == "" {
+		return sink, errors.New("last.fm sink is configured, but not authenticated")
+	}
+
+	client, err := lastfm.NewDesktopClient(lastfm.BaseURL, c.Key, c.Secret)
+	if err != nil {
+		return sink, err
+	}
+
+	return LastFmSink{Client: client, SessionKey: c.SessionKey, Username: c.Username}, nil
 }
 
 func (s LastFmSink) Name() string {
@@ -39,19 +52,4 @@ func (s LastFmSink) Scrobble(p PlaybackStatus) error {
 		"sk":        s.SessionKey,
 	})
 	return err
-}
-
-func LastFmSinkFromConfig(c LastFmConfig) (LastFmSink, error) {
-	var sink LastFmSink
-
-	if c.SessionKey == "" || c.Username == "" {
-		return sink, errors.New(ErrLastFmNotAuthenticated)
-	}
-
-	client, err := lastfm.NewDesktopClient(lastfm.BaseURL, c.Key, c.Secret)
-	if err != nil {
-		return sink, err
-	}
-
-	return LastFmSink{Client: client, SessionKey: c.SessionKey, Username: c.Username}, nil
 }

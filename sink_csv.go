@@ -11,8 +11,12 @@ type CSVSink struct {
 	Filename string
 }
 
+func CSVSinkFromConfig(c CSVConfig) CSVSink {
+	return CSVSink(c)
+}
+
 func (s CSVSink) Name() string {
-	return "local CSV file"
+	return "csv"
 }
 
 func (s CSVSink) NowPlaying(_ PlaybackStatus) error {
@@ -36,7 +40,7 @@ func (s CSVSink) Scrobble(p PlaybackStatus) error {
 
 	scrobbles = append(
 		scrobbles,
-		createRow(p.JoinArtists(), p.Track, p.Album, p.Duration, p.Timestamp),
+		CreateRow(p.JoinArtists(), p.Track, p.Album, p.Duration, p.Timestamp),
 	)
 
 	newFile, err := os.Create(s.Filename)
@@ -48,7 +52,7 @@ func (s CSVSink) Scrobble(p PlaybackStatus) error {
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }
 
-func createRow(artists, track, album string, duration time.Duration, timestamp time.Time) []string {
+func CreateRow(artists, track, album string, duration time.Duration, timestamp time.Time) []string {
 	return []string{
 		artists,
 		track,

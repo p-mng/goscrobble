@@ -112,7 +112,9 @@ func (c Config) GetSinks() []Sink {
 
 	if c.Sinks.CSV != nil {
 		log.Debug().Msg("setting up CSV sink")
-		sinks = append(sinks, CSVSink{Filename: c.Sinks.CSV.Filename})
+
+		sink := CSVSinkFromConfig(*c.Sinks.CSV)
+		sinks = append(sinks, sink)
 	}
 
 	return sinks
@@ -226,20 +228,20 @@ func (c *Config) Validate() {
 	if c.PollRate <= 0 || c.PollRate > 60 {
 		log.Warn().
 			Int("poll_rate", c.PollRate).
-			Msg("invalid poll rate, resetting to default value")
+			Msg("invalid poll rate, using default value")
 		c.PollRate = 2
 	}
 	if c.MinPlaybackDuration <= 0 || c.MinPlaybackDuration > 20*60 {
 		log.Warn().
 			Int64("min_playback_duration", c.MinPlaybackDuration).
-			Msg("invalid minimum playback duration, resetting to default value")
+			Msg("invalid minimum playback duration, using default value")
 		// https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 		c.MinPlaybackDuration = 4 * 60
 	}
 	if c.MinPlaybackPercent <= 0 || c.MinPlaybackPercent > 100 {
 		log.Warn().
 			Int64("min_playback_percent", c.MinPlaybackPercent).
-			Msg("invalid minimum playback percentage, resetting to default value")
+			Msg("invalid minimum playback percentage, using default value")
 		c.MinPlaybackPercent = 50
 	}
 
@@ -262,9 +264,9 @@ func (c Config) WriteConfig() error {
 
 func ConfigDir() string {
 	// https://specifications.freedesktop.org/basedir-spec/latest/
-	xdgConfigHome := os.Getenv("XDG_CONFIG_HOME")
-	if xdgConfigHome != "" {
-		return fmt.Sprintf("%s/goscrobble", xdgConfigHome)
+	configHome := os.Getenv("XDG_CONFIG_HOME")
+	if configHome != "" {
+		return fmt.Sprintf("%s/goscrobble", configHome)
 	}
 
 	return fmt.Sprintf("%s/.config/goscrobble", os.Getenv("HOME"))
