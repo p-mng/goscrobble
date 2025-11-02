@@ -55,26 +55,27 @@ func (s DBusSource) GetInfo(
 			continue
 		}
 
-		artists, err1 := GetDBusMapEntry[[]string](*metadata, "xesam:artist")
-		track, err2 := GetDBusMapEntry[string](*metadata, "xesam:title")
-		album, err3 := GetDBusMapEntry[string](*metadata, "xesam:album")
-		duration, err4 := GetDBusMapEntry[int64](*metadata, "mpris:length")
+		artists, err1 := GetDBusMapEntry[[]string](metadata, "xesam:artist")
+		track, err2 := GetDBusMapEntry[string](metadata, "xesam:title")
+		album, err3 := GetDBusMapEntry[string](metadata, "xesam:album")
+		duration, err4 := GetDBusMapEntry[int64](metadata, "mpris:length")
 
 		if err := errors.Join(err1, err2, err3, err4); err != nil {
-			log.Warn().
+			log.Error().
+				Str("errors", strings.ReplaceAll(err.Error(), "\n", "; ")).
 				Str("player", player).
 				Msg("error parsing metadata for player")
 			continue
 		}
 
 		playbackStatus := PlaybackStatus{
-			Artists:   *artists,
-			Track:     *track,
-			Album:     *album,
-			Duration:  time.Duration(*duration * int64(time.Microsecond)),
+			Artists:   artists,
+			Track:     track,
+			Album:     album,
+			Duration:  time.Duration(duration * int64(time.Microsecond)),
 			Timestamp: time.Time{},
-			State:     PlaybackState(*state),
-			Position:  time.Duration(*position * int64(time.Microsecond)),
+			State:     PlaybackState(state),
+			Position:  time.Duration(position * int64(time.Microsecond)),
 		}
 
 		playbackStatus.RegexReplace(regexes)
@@ -86,26 +87,30 @@ func (s DBusSource) GetInfo(
 	return playerPlaybackStatus, nil
 }
 
-func GetDBusProperty[E any](obj dbus.BusObject, property string) (*E, error) {
+func GetDBusProperty[E any](obj dbus.BusObject, property string) (E, error) {
+	var parsed E
+
 	value, err := obj.GetProperty(property)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get property: %v", err)
+		return parsed, fmt.Errorf("failed to get property: %v", err)
 	}
 
-	if parsedValue, ok := value.Value().(E); ok {
-		return &parsedValue, nil
+	if parsed, ok := value.Value().(E); ok {
+		return parsed, nil
 	}
-	return nil, errors.New("failed to read property from DBus object")
+	return parsed, errors.New("failed to read property from DBus object")
 }
 
-func GetDBusMapEntry[E any](metadata map[string]dbus.Variant, key string) (*E, error) {
+func GetDBusMapEntry[E any](metadata map[string]dbus.Variant, key string) (E, error) {
+	var parsed E
+
 	value, ok := metadata[key]
 	if !ok {
-		return nil, fmt.Errorf("map entry with key %s not found", key)
+		return parsed, fmt.Errorf("map entry with key %s not found", key)
 	}
 
-	if parsedValue, ok := value.Value().(E); ok {
-		return &parsedValue, nil
+	if parsed, ok := value.Value().(E); ok {
+		return parsed, nil
 	}
-	return nil, fmt.Errorf("invalid data type for map entry %s", key)
+	return parsed, fmt.Errorf("invalid data type for map entry %s", key)
 }
