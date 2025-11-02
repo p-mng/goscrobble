@@ -44,7 +44,7 @@ func (s DBusSource) GetInfo(
 		playerObj := s.Conn.Object(player, "/org/mpris/MediaPlayer2")
 
 		metadata, err1 := GetDBusProperty[map[string]dbus.Variant](playerObj, "org.mpris.MediaPlayer2.Player.Metadata")
-		status, err2 := GetDBusProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
+		state, err2 := GetDBusProperty[string](playerObj, "org.mpris.MediaPlayer2.Player.PlaybackStatus")
 		position, err3 := GetDBusProperty[int64](playerObj, "org.mpris.MediaPlayer2.Player.Position")
 
 		if err := errors.Join(err1, err2, err3); err != nil {
@@ -73,7 +73,7 @@ func (s DBusSource) GetInfo(
 			Album:     *album,
 			Duration:  time.Duration(*duration * int64(time.Microsecond)),
 			Timestamp: time.Time{},
-			Status:    *status,
+			State:     PlaybackState(*state),
 			Position:  time.Duration(*position * int64(time.Microsecond)),
 		}
 

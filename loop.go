@@ -136,7 +136,7 @@ func RunMainLoop(config Config) {
 
 			status.Timestamp = previouslyPlaying[player].Timestamp
 
-			if status.Position < minPlayTime || status.Status != PlaybackPlaying || scrobbledPrevious[player] {
+			if status.Position < minPlayTime || status.State != PlaybackPlaying || scrobbledPrevious[player] {
 				continue
 			}
 

@@ -46,11 +46,11 @@ func (s MediaControlSource) GetInfo(
 		return map[string]PlaybackStatus{}, nil
 	}
 
-	var status string
+	var state PlaybackState
 	if outputParsed.Playing {
-		status = PlaybackPlaying
+		state = PlaybackPlaying
 	} else {
-		status = PlaybackStopped
+		state = PlaybackStopped
 	}
 
 	playbackStatus := PlaybackStatus{
@@ -59,7 +59,7 @@ func (s MediaControlSource) GetInfo(
 		Album:     outputParsed.Album,
 		Duration:  time.Duration(outputParsed.Duration * float64(time.Second)),
 		Timestamp: time.Time{},
-		Status:    status,
+		State:     state,
 		Position:  time.Duration(outputParsed.ElapsedTimeNow * float64(time.Second)),
 	}
 

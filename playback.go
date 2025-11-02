@@ -9,11 +9,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type PlaybackState string
+
 // https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Enum:Playback_Status
 const (
-	PlaybackPlaying = "Playing"
-	PlaybackPaused  = "Paused"
-	PlaybackStopped = "Stopped"
+	PlaybackPlaying = PlaybackState("Playing")
+	PlaybackPaused  = PlaybackState("Paused")
+	PlaybackStopped = PlaybackState("Stopped")
 )
 
 type PlaybackStatus struct {
@@ -23,7 +25,7 @@ type PlaybackStatus struct {
 	Duration  time.Duration
 	Timestamp time.Time
 
-	Status   string
+	State    PlaybackState
 	Position time.Duration
 }
 
