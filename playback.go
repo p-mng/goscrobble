@@ -29,16 +29,16 @@ type PlaybackStatus struct {
 	Position time.Duration
 }
 
-func (p PlaybackStatus) JoinArtists() string {
-	return strings.Join(p.Artists, ", ")
-}
-
 type ParsedRegexReplace struct {
 	Match   *regexp.Regexp
 	Replace string
 	Artist  bool
 	Track   bool
 	Album   bool
+}
+
+func (p PlaybackStatus) JoinArtists() string {
+	return strings.Join(p.Artists, ", ")
 }
 
 func (p PlaybackStatus) Equals(other PlaybackStatus) bool {
