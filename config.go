@@ -70,8 +70,10 @@ func (c Config) GetSources() []Source {
 		var conn *dbus.Conn
 		var err error
 		if c.Sources.DBus.Address == "" {
+			log.Debug().Msg("connecting to session bus")
 			conn, err = dbus.ConnectSessionBus()
 		} else {
+			log.Debug().Str("address", c.Sources.DBus.Address).Msg("connecting to bus")
 			conn, err = dbus.Connect(c.Sources.DBus.Address)
 		}
 

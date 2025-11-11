@@ -9,7 +9,7 @@ import (
 
 func CloseFile(file *os.File) {
 	if err := file.Close(); err != nil {
-		log.Error().Err(err).Msg("error closing scrobbles file")
+		log.Error().Err(err).Str("filename", file.Name()).Msg("error closing file")
 	}
 }
 
