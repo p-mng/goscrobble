@@ -4,7 +4,7 @@
 
 ## Description
 
-A simple, cross-platform music scrobbler daemon. Inspired by audio software like PulseAudio and PipeWire, it can be configured to connect different sources (e.g., media players) and sinks (e.g., last.fm).
+A simple, cross-platform music scrobbler daemon. Inspired by audio software like PulseAudio and PipeWire, it can be configured to connect different _sources_ (e.g., media players) and _sinks_ (e.g., last.fm).
 
 > [!WARNING]
 > This project is still beta software. Features may break without warning (especially on macOS), scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
@@ -35,7 +35,11 @@ brew install media-control terminal-notifier
 
 ## Configuration
 
-The following configuration file (created automatically in `~/.config/goscrobble/config.toml`) can be used to scrobble to last.fm and a local file:
+A configuration file is created automatically in your config directory (usually `$HOME/.config/goscrobble/config.toml`).
+
+<details>
+
+<summary>Example configuration file</summary>
 
 ```toml
 # track position update frequency in seconds
@@ -49,7 +53,7 @@ notify_on_scrobble = false
 # send a desktop notification when a scrobble cannot be saved
 notify_on_error = true
 # player blacklist
-blacklist = ["chromium", "firefox"]
+blacklist = ['chromium', 'firefox']
 
 # regex match/replace
 [[regexes]]
@@ -60,8 +64,8 @@ track = true
 album = true
 
 [[regexes]]
-match = " - Radio Edit"
-replace = " (Radio Edit)"
+match = ' - Radio Edit'
+replace = ' (Radio Edit)'
 track = true
 
 [sources.dbus]
@@ -76,9 +80,9 @@ arguments = ['get', '--now']
 
 [sinks.lastfm]
 # last.fm API key
-key = 'last.fm API key'
+key = 'replace with last.fm API key'
 # last.fm API shared secret
-secret = 'last.fm API secret'
+secret = 'replace with last.fm API secret'
 # last.fm session key, automatically set by 'goscrobble lastfm-auth'
 session_key = ''
 # last.fm username, automatically set by 'goscrobble lastfm-auth'
@@ -89,7 +93,11 @@ username = ''
 filename = '/Users/patrick/scrobbles.csv'
 ```
 
-You can blacklist one or more players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS. The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
+</details>
+
+You can blacklist players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS.
+
+The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
 
 ## Connect last.fm account
 
