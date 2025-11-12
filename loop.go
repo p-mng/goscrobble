@@ -120,11 +120,16 @@ func RunMainLoop(config Config) {
 					Msg("started playback of new track")
 
 				if config.NotifyOnScrobble {
-					nowPlayingNotificationID = sendNotification(
+					newID, err := SendNotification(
+						nowPlayingNotificationID,
 						fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
 						fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
-						nowPlayingNotificationID,
 					)
+					if err != nil {
+						log.Error().Err(err).Msg("error sending notification")
+					} else {
+						nowPlayingNotificationID = newID
+					}
 				}
 
 				for _, sink := range sinks {
@@ -146,11 +151,13 @@ func RunMainLoop(config Config) {
 				Msg("scrobbling track")
 
 			if config.NotifyOnScrobble {
-				sendNotification(
+				if _, err := SendNotification(
+					uint32(0),
 					fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
-					uint32(0),
-				)
+				); err != nil {
+					log.Error().Err(err).Msg("error sending notification")
+				}
 			}
 
 			scrobbledPrevious[player] = true
@@ -181,11 +188,13 @@ func sendNowPlaying(player string,
 			Msg("error updating now playing status")
 
 		if config.NotifyOnError {
-			sendNotification(
+			if _, err := SendNotification(
+				uint32(0),
 				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error updating now playing status: %s", err.Error()),
-				uint32(0),
-			)
+			); err != nil {
+				log.Error().Err(err).Msg("error sending notification")
+			}
 		}
 	} else {
 		log.Debug().
@@ -215,11 +224,13 @@ func sendScrobble(player string,
 			Msg("error saving scrobble")
 
 		if config.NotifyOnError {
-			sendNotification(
+			if _, err := SendNotification(
+				uint32(0),
 				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error saving scrobble: %s", err.Error()),
-				uint32(0),
-			)
+			); err != nil {
+				log.Error().Err(err).Msg("error sending notification")
+			}
 		}
 	} else {
 		log.Info().
@@ -239,19 +250,4 @@ func minPlayTime(status PlaybackStatus, config Config) (time.Duration, error) {
 	halfDuration := time.Duration(int64(status.Duration/100) * config.MinPlaybackPercent)
 
 	return min(configDuration, halfDuration), nil
-}
-
-func sendNotification(summary, body string, replacesID uint32) uint32 {
-	id, err := SendNotification(replacesID, summary, body)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Interface("notification", map[string]string{
-				"summary": summary,
-				"text":    body},
-			).
-			Msg("error sending desktop notification via dbus")
-		return replacesID
-	}
-	return id
 }
