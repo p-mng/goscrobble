@@ -12,8 +12,8 @@ import (
 
 type Config struct {
 	PollRate            int            `toml:"poll_rate"`
-	MinPlaybackDuration int64          `toml:"min_playback_duration"`
-	MinPlaybackPercent  int64          `toml:"min_playback_percent"`
+	MinPlaybackDuration int            `toml:"min_playback_duration"`
+	MinPlaybackPercent  int            `toml:"min_playback_percent"`
 	NotifyOnScrobble    bool           `toml:"notify_on_scrobble"`
 	NotifyOnError       bool           `toml:"notify_on_error"`
 	Blacklist           []string       `toml:"blacklist"`
@@ -235,14 +235,14 @@ func (c *Config) Validate() {
 	}
 	if c.MinPlaybackDuration <= 0 || c.MinPlaybackDuration > 20*60 {
 		log.Warn().
-			Int64("min_playback_duration", c.MinPlaybackDuration).
+			Int("min_playback_duration", c.MinPlaybackDuration).
 			Msg("invalid minimum playback duration, using default value")
 		// https://www.last.fm/api/scrobbling#when-is-a-scrobble-a-scrobble
 		c.MinPlaybackDuration = 4 * 60
 	}
 	if c.MinPlaybackPercent <= 0 || c.MinPlaybackPercent > 100 {
 		log.Warn().
-			Int64("min_playback_percent", c.MinPlaybackPercent).
+			Int("min_playback_percent", c.MinPlaybackPercent).
 			Msg("invalid minimum playback percentage, using default value")
 		c.MinPlaybackPercent = 50
 	}

@@ -97,7 +97,11 @@ func RunMainLoop(config Config) {
 				continue
 			}
 
-			minPlayTime, err := minPlayTime(status, config)
+			minPlayTime, err := MinPlayTime(
+				status.Duration,
+				config.MinPlaybackDuration,
+				config.MinPlaybackPercent,
+			)
 			if err != nil {
 				log.Warn().
 					Str("player", player).
@@ -133,7 +137,7 @@ func RunMainLoop(config Config) {
 				}
 
 				for _, sink := range sinks {
-					sendNowPlaying(player, sink, status, config)
+					SendNowPlaying(player, sink, status, config)
 				}
 
 				continue
@@ -163,13 +167,13 @@ func RunMainLoop(config Config) {
 			scrobbledPrevious[player] = true
 
 			for _, sink := range sinks {
-				sendScrobble(player, sink, status, config)
+				SendScrobble(player, sink, status, config)
 			}
 		}
 	}
 }
 
-func sendNowPlaying(player string,
+func SendNowPlaying(player string,
 	sink Sink,
 	status PlaybackStatus,
 	config Config,
@@ -205,7 +209,7 @@ func sendNowPlaying(player string,
 	}
 }
 
-func sendScrobble(player string,
+func SendScrobble(player string,
 	sink Sink,
 	status PlaybackStatus,
 	config Config,
@@ -241,13 +245,17 @@ func sendScrobble(player string,
 	}
 }
 
-func minPlayTime(status PlaybackStatus, config Config) (time.Duration, error) {
-	if status.Duration < time.Duration(0) {
-		return 0, fmt.Errorf("invalid track length: %d", status.Duration)
+func MinPlayTime(
+	duration time.Duration,
+	minPlaybackDuration int,
+	minPlaybackPercent int,
+) (time.Duration, error) {
+	if duration < time.Duration(0) {
+		return 0, fmt.Errorf("invalid track length: %d", duration)
 	}
 
-	configDuration := time.Duration(config.MinPlaybackDuration * int64(time.Second))
-	halfDuration := time.Duration(int64(status.Duration/100) * config.MinPlaybackPercent)
+	configDuration := time.Duration(minPlaybackDuration * int(time.Second))
+	halfDuration := time.Duration(minPlaybackPercent * int(duration/100))
 
 	return min(configDuration, halfDuration), nil
 }
