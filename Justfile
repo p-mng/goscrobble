@@ -11,7 +11,8 @@ lint:
     shellcheck scripts/install.sh
 
 test:
-    go test -v ./...
+    go test -coverprofile=cover.out -v ./...
+    go tool cover -html cover.out
 
 build:
     go build -v ./...
