@@ -5,11 +5,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func SendNotification(
-	replacesID uint32,
-	summary,
-	body string,
-) (uint32, error) {
+func SendNotification(replacesID uint32, summary, body string) (uint32, error) {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		return 0, err

@@ -137,7 +137,7 @@ func RunMainLoop(config Config) {
 				}
 
 				for _, sink := range sinks {
-					SendNowPlaying(player, sink, status, config)
+					SendNowPlaying(player, sink, status, config.NotifyOnError, SendNotification)
 				}
 
 				continue
@@ -167,7 +167,7 @@ func RunMainLoop(config Config) {
 			scrobbledPrevious[player] = true
 
 			for _, sink := range sinks {
-				SendScrobble(player, sink, status, config)
+				SendScrobble(player, sink, status, config.NotifyOnError, SendNotification)
 			}
 		}
 	}
@@ -176,13 +176,15 @@ func RunMainLoop(config Config) {
 func SendNowPlaying(player string,
 	sink Sink,
 	status PlaybackStatus,
-	config Config,
+	notifyOnError bool,
+	notifier NotifierFunc,
 ) {
 	log.Debug().
 		Str("player", player).
 		Str("sink", sink.Name()).
 		Interface("status", status).
 		Msg("updating now playing status")
+
 	if err := sink.NowPlaying(status); err != nil {
 		log.Error().
 			Str("player", player).
@@ -191,8 +193,8 @@ func SendNowPlaying(player string,
 			Err(err).
 			Msg("error updating now playing status")
 
-		if config.NotifyOnError {
-			if _, err := SendNotification(
+		if notifyOnError {
+			if _, err := notifier(
 				uint32(0),
 				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error updating now playing status: %s", err.Error()),
@@ -212,13 +214,15 @@ func SendNowPlaying(player string,
 func SendScrobble(player string,
 	sink Sink,
 	status PlaybackStatus,
-	config Config,
+	notifyOnError bool,
+	notifier NotifierFunc,
 ) {
 	log.Debug().
 		Str("player", player).
 		Str("sink", sink.Name()).
 		Interface("status", status).
 		Msg("saving scrobble")
+
 	if err := sink.Scrobble(status); err != nil {
 		log.Error().
 			Str("player", player).
@@ -227,8 +231,8 @@ func SendScrobble(player string,
 			Err(err).
 			Msg("error saving scrobble")
 
-		if config.NotifyOnError {
-			if _, err := SendNotification(
+		if notifyOnError {
+			if _, err := notifier(
 				uint32(0),
 				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error saving scrobble: %s", err.Error()),

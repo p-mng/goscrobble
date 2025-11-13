@@ -8,6 +8,60 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestSendNowPlaying(t *testing.T) {
+	mockSink := MockSink{}
+	mockNotifier := MockNotifier{}
+
+	main.SendNowPlaying(
+		"mock-player",
+		&mockSink,
+		defaultPlaybackStatus,
+		true,
+		mockNotifier.SendNotification,
+	)
+	require.Len(t, mockSink.NowPlayingLog, 1)
+	require.Equal(t, 0, mockNotifier.Notifications)
+
+	mockSink.Error = true
+
+	main.SendNowPlaying(
+		"mock-player",
+		&mockSink,
+		defaultPlaybackStatus,
+		true,
+		mockNotifier.SendNotification,
+	)
+	require.Len(t, mockSink.NowPlayingLog, 1)
+	require.Equal(t, 1, mockNotifier.Notifications)
+}
+
+func TestSendScrobble(t *testing.T) {
+	mockSink := MockSink{}
+	mockNotifier := MockNotifier{}
+
+	main.SendScrobble(
+		"mock-player",
+		&mockSink,
+		defaultPlaybackStatus,
+		true,
+		mockNotifier.SendNotification,
+	)
+	require.Len(t, mockSink.ScrobbleLog, 1)
+	require.Equal(t, 0, mockNotifier.Notifications)
+
+	mockSink.Error = true
+
+	main.SendScrobble(
+		"mock-player",
+		&mockSink,
+		defaultPlaybackStatus,
+		true,
+		mockNotifier.SendNotification,
+	)
+	require.Len(t, mockSink.ScrobbleLog, 1)
+	require.Equal(t, 1, mockNotifier.Notifications)
+}
+
 func TestMinPlayTime(t *testing.T) {
 	minPlaybackDuration := 4 * 60
 	minPlaybackPercent := 50
