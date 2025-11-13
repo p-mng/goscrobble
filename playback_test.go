@@ -64,3 +64,20 @@ func TestPlaybackStatusRegexReplace(t *testing.T) {
 	})
 	require.Equal(t, "With You I'm Nothing", copied.Track)
 }
+
+func TestIsBlacklisted(t *testing.T) {
+	blacklist := []*regexp.Regexp{
+		regexp.MustCompile("firefox"),
+		regexp.MustCompile("chromium"),
+	}
+	expected := map[string]bool{
+		"org.mpris.MediaPlayer2.chromium.instance10670": true,
+		"org.mpris.MediaPlayer2.firefox.instance_1_84":  true,
+		"org.mozilla.firefox":                           true,
+		"com.tidal.desktop":                             false,
+	}
+
+	for k, v := range expected {
+		require.Equal(t, main.IsBlacklisted(blacklist, k), v)
+	}
+}
