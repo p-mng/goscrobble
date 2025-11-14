@@ -19,7 +19,7 @@ const (
 )
 
 func RunMainLoop(config Config) {
-	log.Debug().Msg("started main loop")
+	log.Debug().Msg("starting main loop")
 
 	previouslyPlaying := map[string]PlaybackStatus{}
 	scrobbledPrevious := map[string]bool{}
@@ -30,119 +30,145 @@ func RunMainLoop(config Config) {
 	sources := config.SetupSources()
 	sinks := config.SetupSinks()
 
+	ticker := time.NewTicker(time.Second * time.Duration(config.PollRate))
+
 	for {
-		log.Debug().
-			Dur("duration", time.Duration(config.PollRate)).
-			Msg("waiting for next poll")
-		time.Sleep(time.Second * time.Duration(config.PollRate))
+		RunMainLoopIteration(
+			previouslyPlaying,
+			scrobbledPrevious,
+			playerBlacklist,
+			parsedRegexes,
+			sources,
+			sinks,
+			config.MinPlaybackDuration,
+			config.MinPlaybackPercent,
+			config.NotifyOnScrobble,
+			config.NotifyOnError,
+		)
 
-		playbackStatus := make(map[string]PlaybackStatus)
+		timestamp := <-ticker.C
+		log.Debug().Time("timestamp", timestamp).Msg("finished main loop iteration")
+	}
+}
 
-		for _, source := range sources {
-			status, err := source.GetInfo(playerBlacklist, parsedRegexes)
-			if err != nil {
-				log.Error().Err(err).Str("source", source.Name()).Msg("error getting current playback status")
-			}
-			maps.Copy(playbackStatus, status)
+func RunMainLoopIteration(
+	previouslyPlaying map[string]PlaybackStatus,
+	scrobbledPrevious map[string]bool,
+	playerBlacklist []*regexp.Regexp,
+	parsedRegexes []ParsedRegexReplace,
+	sources []Source,
+	sinks []Sink,
+	minPlaybackDuration int,
+	minPlaybackPercent int,
+	notifyOnScrobble bool,
+	notifyOnError bool,
+) {
+	playbackStatus := make(map[string]PlaybackStatus)
+
+	for _, source := range sources {
+		status, err := source.GetInfo(playerBlacklist, parsedRegexes)
+		if err != nil {
+			log.Error().Err(err).Str("source", source.Name()).Msg("error getting current playback status")
+		}
+		maps.Copy(playbackStatus, status)
+	}
+
+	for player := range playbackStatus {
+		if _, ok := previouslyPlaying[player]; !ok {
+			log.Info().
+				Str("player", player).
+				Msg("new player found")
+			previouslyPlaying[player] = PlaybackStatus{}
+			scrobbledPrevious[player] = false
+		}
+	}
+
+	for player := range previouslyPlaying {
+		if _, ok := playbackStatus[player]; !ok {
+			log.Info().
+				Str("player", player).
+				Msg("player disappeared")
+			delete(previouslyPlaying, player)
+			delete(scrobbledPrevious, player)
+		}
+	}
+
+	for player, status := range playbackStatus {
+		if !status.IsValid() {
+			continue
 		}
 
-		for player := range playbackStatus {
-			if _, ok := previouslyPlaying[player]; !ok {
-				log.Info().
-					Str("player", player).
-					Msg("new player found")
-				previouslyPlaying[player] = PlaybackStatus{}
-				scrobbledPrevious[player] = false
-			}
+		minPlayTime, err := MinPlayTime(
+			status.Duration,
+			minPlaybackDuration,
+			minPlaybackPercent,
+		)
+		if err != nil {
+			log.Warn().
+				Str("player", player).
+				Interface("status", status).
+				Err(err).
+				Msg("cannot calculate minimum playback time")
+			continue
 		}
 
-		for player := range previouslyPlaying {
-			if _, ok := playbackStatus[player]; !ok {
-				log.Info().
-					Str("player", player).
-					Msg("player disappeared")
-				delete(previouslyPlaying, player)
-				delete(scrobbledPrevious, player)
-			}
-		}
+		if !status.Equals(previouslyPlaying[player]) {
+			status.Position = time.Duration(0)
+			status.Timestamp = time.Now()
 
-		for player, status := range playbackStatus {
-			if !status.IsValid() {
-				continue
-			}
-
-			minPlayTime, err := MinPlayTime(
-				status.Duration,
-				config.MinPlaybackDuration,
-				config.MinPlaybackPercent,
-			)
-			if err != nil {
-				log.Warn().
-					Str("player", player).
-					Interface("status", status).
-					Err(err).
-					Msg("cannot calculate minimum playback time")
-				continue
-			}
-
-			if !status.Equals(previouslyPlaying[player]) {
-				status.Position = time.Duration(0)
-				status.Timestamp = time.Now()
-
-				previouslyPlaying[player] = status
-				scrobbledPrevious[player] = false
-
-				log.Info().
-					Str("player", player).
-					Interface("status", status).
-					Msg("started playback of new track")
-
-				if config.NotifyOnScrobble {
-					newID, err := SendNotification(
-						nowPlayingNotificationID,
-						fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
-						fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
-					)
-					if err != nil {
-						log.Error().Err(err).Msg("error sending notification")
-					} else {
-						nowPlayingNotificationID = newID
-					}
-				}
-
-				for _, sink := range sinks {
-					SendNowPlaying(player, sink, status, config.NotifyOnError, SendNotification)
-				}
-
-				continue
-			}
-
-			status.Timestamp = previouslyPlaying[player].Timestamp
-
-			if status.Position < minPlayTime || status.State != PlaybackPlaying || scrobbledPrevious[player] {
-				continue
-			}
+			previouslyPlaying[player] = status
+			scrobbledPrevious[player] = false
 
 			log.Info().
 				Str("player", player).
 				Interface("status", status).
-				Msg("scrobbling track")
+				Msg("started playback of new track")
 
-			if config.NotifyOnScrobble {
-				if _, err := SendNotification(
-					uint32(0),
-					fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
+			if notifyOnScrobble {
+				newID, err := SendNotification(
+					nowPlayingNotificationID,
+					fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
-				); err != nil {
+				)
+				if err != nil {
 					log.Error().Err(err).Msg("error sending notification")
+				} else {
+					nowPlayingNotificationID = newID
 				}
 			}
 
-			scrobbledPrevious[player] = true
-
 			for _, sink := range sinks {
-				SendScrobble(player, sink, status, config.NotifyOnError, SendNotification)
+				SendNowPlaying(player, sink, status, notifyOnError, SendNotification)
 			}
+
+			continue
+		}
+
+		status.Timestamp = previouslyPlaying[player].Timestamp
+
+		if status.Position < minPlayTime || status.State != PlaybackPlaying || scrobbledPrevious[player] {
+			continue
+		}
+
+		log.Info().
+			Str("player", player).
+			Interface("status", status).
+			Msg("scrobbling track")
+
+		if notifyOnScrobble {
+			if _, err := SendNotification(
+				uint32(0),
+				fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
+				fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
+			); err != nil {
+				log.Error().Err(err).Msg("error sending notification")
+			}
+		}
+
+		scrobbledPrevious[player] = true
+
+		for _, sink := range sinks {
+			SendScrobble(player, sink, status, notifyOnError, SendNotification)
 		}
 	}
 }
