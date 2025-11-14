@@ -35,13 +35,13 @@ func main() {
 		Commands: []*cli.Command{
 			{
 				Name:   "run",
-				Usage:  "Continuously checks music players and sends scrobbles to configured sinks",
-				Action: cmdRun,
+				Usage:  "Watch sources and send scrobbles to configured sinks",
+				Action: ActionRun,
 			},
 			{
 				Name:   "lastfm-auth",
-				Usage:  "Write last.fm session key and username to the config file",
-				Action: cmdLastFmAuth,
+				Usage:  "Authenticate last.fm sand save session key and username",
+				Action: ActionAuthLastFm,
 			},
 		},
 	}
@@ -51,8 +51,8 @@ func main() {
 	}
 }
 
-func cmdRun(_ context.Context, cmd *cli.Command) error {
-	setupLogger(cmd)
+func ActionRun(_ context.Context, cmd *cli.Command) error {
+	SetupLogger(cmd)
 
 	config, err := ReadConfig()
 	if err != nil {
@@ -66,8 +66,8 @@ func cmdRun(_ context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func cmdLastFmAuth(_ context.Context, cmd *cli.Command) error {
-	setupLogger(cmd)
+func ActionAuthLastFm(_ context.Context, cmd *cli.Command) error {
+	SetupLogger(cmd)
 
 	config, err := ReadConfig()
 	if err != nil {
@@ -130,7 +130,7 @@ func cmdLastFmAuth(_ context.Context, cmd *cli.Command) error {
 	return nil
 }
 
-func setupLogger(cmd *cli.Command) {
+func SetupLogger(cmd *cli.Command) {
 	debug := cmd.Bool("debug")
 	json := cmd.Bool("json")
 
