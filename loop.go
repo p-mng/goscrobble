@@ -24,37 +24,11 @@ func RunMainLoop(config Config) {
 	previouslyPlaying := map[string]PlaybackStatus{}
 	scrobbledPrevious := map[string]bool{}
 
-	var playerBlacklist []*regexp.Regexp
-
-	for _, expression := range config.Blacklist {
-		compiled, err := regexp.Compile(expression)
-		if err != nil {
-			log.Warn().
-				Str("expression", expression).
-				Err(err).
-				Msg("failed to compile regex blacklist entry")
-			continue
-		}
-
-		log.Debug().
-			Str("expression", expression).
-			Msg("compiled regex blacklist entry")
-		playerBlacklist = append(playerBlacklist, compiled)
-	}
-
+	playerBlacklist := CompilePlayerBlacklist(config.Blacklist)
 	parsedRegexes := config.ParseRegexes()
-	log.Debug().Msg("parsed match/replace expressions")
 
-	sources := config.GetSources()
-	sinks := config.GetSinks()
-	log.Debug().Msg("set up sources and sinks")
-
-	if len(sources) == 0 {
-		log.Warn().Msg("no sources configured")
-	}
-	if len(sinks) == 0 {
-		log.Warn().Msg("no sinks configured")
-	}
+	sources := config.SetupSources()
+	sinks := config.SetupSinks()
 
 	for {
 		log.Debug().
@@ -171,6 +145,28 @@ func RunMainLoop(config Config) {
 			}
 		}
 	}
+}
+
+func CompilePlayerBlacklist(blacklist []string) []*regexp.Regexp {
+	var playerBlacklist []*regexp.Regexp
+
+	for _, expression := range blacklist {
+		compiled, err := regexp.Compile(expression)
+		if err != nil {
+			log.Warn().
+				Str("expression", expression).
+				Err(err).
+				Msg("failed to compile regex blacklist entry")
+			continue
+		}
+
+		log.Debug().
+			Str("expression", expression).
+			Msg("compiled regex blacklist entry")
+		playerBlacklist = append(playerBlacklist, compiled)
+	}
+
+	return playerBlacklist
 }
 
 func SendNowPlaying(player string,

@@ -61,7 +61,7 @@ type CSVConfig struct {
 	Filename string `toml:"filename"`
 }
 
-func (c Config) GetSources() []Source {
+func (c Config) SetupSources() []Source {
 	var sources []Source
 
 	if c.Sources.DBus != nil {
@@ -95,10 +95,16 @@ func (c Config) GetSources() []Source {
 		})
 	}
 
+	if len(sources) == 0 {
+		log.Warn().Msg("no sources configured")
+	} else {
+		log.Debug().Msg("set up sources")
+	}
+
 	return sources
 }
 
-func (c Config) GetSinks() []Sink {
+func (c Config) SetupSinks() []Sink {
 	var sinks []Sink
 
 	if c.Sinks.LastFm != nil {
@@ -117,6 +123,12 @@ func (c Config) GetSinks() []Sink {
 
 		sink := CSVSinkFromConfig(*c.Sinks.CSV)
 		sinks = append(sinks, sink)
+	}
+
+	if len(sinks) == 0 {
+		log.Warn().Msg("no sinks configured")
+	} else {
+		log.Debug().Msg("set up sinks")
 	}
 
 	return sinks
@@ -143,6 +155,7 @@ func (c Config) ParseRegexes() []ParsedRegexReplace {
 		})
 	}
 
+	log.Debug().Msg("parsed match/replace expressions")
 	return parsed
 }
 
