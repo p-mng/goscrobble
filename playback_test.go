@@ -77,6 +77,17 @@ func TestScrobbleRegexReplace(t *testing.T) {
 	require.Equal(t, "A Place For Us To Dream", copied.Album)
 }
 
+func TestScrobbleToStringSlice(t *testing.T) {
+	expected := []string{
+		"Placebo, David Bowie",
+		"Without You I'm Nothing",
+		"A Place For Us To Dream",
+		"251.00",
+		defaultScrobble.Timestamp.Format(time.RFC1123),
+	}
+	require.Equal(t, expected, defaultScrobble.ToStringSlice())
+}
+
 func TestIsBlacklisted(t *testing.T) {
 	blacklist := []*regexp.Regexp{
 		regexp.MustCompile("firefox"),

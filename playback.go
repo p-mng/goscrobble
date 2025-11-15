@@ -3,6 +3,7 @@ package main
 import (
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,6 +88,16 @@ func (s *Scrobble) RegexReplace(regexes []ParsedRegexReplace) {
 		if r.Album {
 			s.Album = r.Match.ReplaceAllString(s.Album, r.Replace)
 		}
+	}
+}
+
+func (s Scrobble) ToStringSlice() []string {
+	return []string{
+		s.JoinArtists(),
+		s.Track,
+		s.Album,
+		strconv.FormatFloat(s.Duration.Seconds(), 'f', 2, 64),
+		s.Timestamp.Format(time.RFC1123),
 	}
 }
 
