@@ -100,6 +100,14 @@ func TestMainLoop(t *testing.T) {
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 2)
 	require.Equal(t, mockNotifier.Notifications, 6)
+
+	fakeSource.Empty = true
+	fakeSink.Error = false
+
+	runLoop()
+	require.Len(t, fakeSink.NowPlayingLog, 2)
+	require.Len(t, fakeSink.ScrobbleLog, 2)
+	require.Equal(t, mockNotifier.Notifications, 6)
 }
 
 func TestCompilePlayerBlacklist(t *testing.T) {

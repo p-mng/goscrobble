@@ -55,13 +55,22 @@ func TestPlaybackStatusRegexReplace(t *testing.T) {
 
 	copied.RegexReplace([]main.ParsedRegexReplace{
 		{
+			Match:   regexp.MustCompile("David Bowie"),
+			Replace: "DavidBowie",
+			Artist:  true,
+			Track:   false,
+			Album:   false,
+		},
+		{
 			Match:   regexp.MustCompile("^Without You"),
 			Replace: "With You",
 			Artist:  false,
 			Track:   true,
-			Album:   false,
+			Album:   true,
 		},
 	})
+	require.Equal(t, "DavidBowie", copied.Artists[1])
+	require.Equal(t, "With You I'm Nothing", copied.Track)
 	require.Equal(t, "With You I'm Nothing", copied.Track)
 }
 
