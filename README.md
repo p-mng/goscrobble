@@ -13,15 +13,13 @@ A simple, cross-platform music scrobbler daemon. Inspired by audio software like
 
 ## Installation
 
-### Linux, macOS (install script)
-
-Using the provided install script:
+### Install script
 
 ```shell
 curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/scripts/install.sh | bash
 ```
 
-This will default to the latest tagged version. Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=dev`).
+This will install the latest tagged version. Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=dev`).
 
 On macOS, [media-control](https://github.com/ungive/media-control) and [julienXX/terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
 
@@ -112,13 +110,6 @@ The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and
 
 tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right now, you should add `tidal-hifi` to your blacklist, as the album name is incorrectly reported (see [tidal-hifi issue 505](https://github.com/Mastermindzh/tidal-hifi/issues/505)).
 
-## TODOs
-
-- Add more sinks (e.g., Maloja, LibreFM, ListenBrainz, etc.)
-- Add Microsoft Windows support
-- Test more Linux distros, macOS versions, and music players
-- Add unit/integration tests
-
 ## Similar projects
 
 - [FoxxMD/multi-scrobbler](https://github.com/FoxxMD/multi-scrobbler): scrobbler for multiple sources and clients (written in TypeScript)
@@ -126,7 +117,3 @@ tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right 
 - [InputUsername/rescrobbled](https://github.com/InputUsername/rescrobbled): MPRIS scrobbler (written in Rust)
 - [hrfee/go-scrobble](https://github.com/hrfee/go-scrobble): "ugly last.fm scrobbler" (written in Go)
 - [web-scrobbler/web-scrobbler](https://github.com/web-scrobbler/web-scrobbler): scrobbling browser extension (written in TypeScript)
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
