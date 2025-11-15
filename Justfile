@@ -12,7 +12,7 @@ lint:
 
 test:
     go test -coverprofile=cover.out -v ./...
-    go tool cover -html cover.out
+    echo 'run `go tool cover -html cover.out` to view test coverage'
 
 build:
     go build -v ./...
