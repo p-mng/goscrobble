@@ -44,6 +44,7 @@ func RunMainLoop(config Config) {
 			config.MinPlaybackPercent,
 			config.NotifyOnScrobble,
 			config.NotifyOnError,
+			SendNotification,
 		)
 
 		timestamp := <-ticker.C
@@ -62,6 +63,7 @@ func RunMainLoopIteration(
 	minPlaybackPercent int,
 	notifyOnScrobble bool,
 	notifyOnError bool,
+	notifier NotifierFunc,
 ) {
 	playbackStatus := make(map[string]PlaybackStatus)
 
@@ -125,7 +127,7 @@ func RunMainLoopIteration(
 				Msg("started playback of new track")
 
 			if notifyOnScrobble {
-				newID, err := SendNotification(
+				newID, err := notifier(
 					nowPlayingNotificationID,
 					fmt.Sprintf("%c now playing: %s", RuneBeamedSixteenthNotes, status.Track),
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
@@ -138,7 +140,7 @@ func RunMainLoopIteration(
 			}
 
 			for _, sink := range sinks {
-				SendNowPlaying(player, sink, status, notifyOnError, SendNotification)
+				SendNowPlaying(player, sink, status, notifyOnError, notifier)
 			}
 
 			continue
@@ -156,7 +158,7 @@ func RunMainLoopIteration(
 			Msg("scrobbling track")
 
 		if notifyOnScrobble {
-			if _, err := SendNotification(
+			if _, err := notifier(
 				uint32(0),
 				fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
 				fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
@@ -168,7 +170,7 @@ func RunMainLoopIteration(
 		scrobbledPrevious[player] = true
 
 		for _, sink := range sinks {
-			SendScrobble(player, sink, status, notifyOnError, SendNotification)
+			SendScrobble(player, sink, status, notifyOnError, notifier)
 		}
 	}
 }
