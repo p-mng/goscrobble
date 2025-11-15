@@ -28,7 +28,7 @@ func (s CSVSink) Scrobble(p PlaybackStatus) error {
 
 	file, err := os.Open(s.Filename)
 	if err == nil {
-		defer CloseFile(file)
+		defer CloseLogged(file)
 
 		scrobbles, err = csv.NewReader(file).ReadAll()
 		if err != nil {
@@ -47,7 +47,7 @@ func (s CSVSink) Scrobble(p PlaybackStatus) error {
 	if err != nil {
 		return err
 	}
-	defer CloseFile(newFile)
+	defer CloseLogged(newFile)
 
 	return csv.NewWriter(newFile).WriteAll(scrobbles)
 }

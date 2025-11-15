@@ -10,7 +10,7 @@ func SendNotification(replacesID uint32, summary, body string) (uint32, error) {
 	if err != nil {
 		return 0, err
 	}
-	defer CloseDBus(conn)
+	defer CloseLogged(conn)
 
 	// https://specifications.freedesktop.org/notification/1.3/basic-design.html#id-1.3.6
 	args := []any{"goscrobble", replacesID, "", summary, body, []string{}, map[string]dbus.Variant{}, int32(-1)}

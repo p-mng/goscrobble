@@ -1,20 +1,12 @@
 package main
 
 import (
-	"os"
-
-	"github.com/godbus/dbus/v5"
 	"github.com/rs/zerolog/log"
+	"io"
 )
 
-func CloseFile(file *os.File) {
-	if err := file.Close(); err != nil {
-		log.Error().Err(err).Str("filename", file.Name()).Msg("error closing file")
-	}
-}
-
-func CloseDBus(conn *dbus.Conn) {
-	if err := conn.Close(); err != nil {
-		log.Warn().Err(err).Msg("error closing dbus connection")
+func CloseLogged(closer io.Closer) {
+	if err := closer.Close(); err != nil {
+		log.Error().Err(err).Interface("closer", closer).Msg("error calling `Close`")
 	}
 }
