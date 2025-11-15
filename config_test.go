@@ -54,12 +54,14 @@ func TestConfigWrite(t *testing.T) {
 
 func TestConfigDir(t *testing.T) {
 	t.Run("$XDG_CONFIG_HOME", func(t *testing.T) {
-		t.Setenv("XDG_CONFIG_HOME", "/home/user/.config")
+		t.Setenv("HOME", "/home/user")
+		t.Setenv("XDG_CONFIG_HOME", "/home/user/my-config-dir")
 		configDir := main.ConfigDir()
-		require.Equal(t, "/home/user/.config/goscrobble", configDir)
+		require.Equal(t, "/home/user/my-config-dir/goscrobble", configDir)
 	})
 	t.Run("$HOME", func(t *testing.T) {
 		t.Setenv("HOME", "/home/user")
+		t.Setenv("XDG_CONFIG_HOME", "")
 		configDir := main.ConfigDir()
 		require.Equal(t, "/home/user/.config/goscrobble", configDir)
 	})
