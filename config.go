@@ -10,6 +10,24 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var DefaultConfig = Config{
+	PollRate:            2,
+	MinPlaybackDuration: 4 * 60,
+	MinPlaybackPercent:  50,
+	Blacklist:           []string{},
+	Regexes:             []RegexReplace{},
+	NotifyOnScrobble:    false,
+	NotifyOnError:       true,
+	Sources: SourcesConfig{
+		DBus:         &DBusConfig{Address: ""},
+		MediaControl: &MediaControlConfig{Command: "media-control", Arguments: []string{"get", "--now"}},
+	},
+	Sinks: SinksConfig{
+		LastFm: &LastFmConfig{Key: "last.fm API key", Secret: "last.fm API secret", SessionKey: "", Username: ""},
+		CSV:    &CSVConfig{Filename: fmt.Sprintf("%s/scrobbles.csv", os.Getenv("HOME"))},
+	},
+}
+
 type Config struct {
 	PollRate            int            `toml:"poll_rate"`
 	MinPlaybackDuration int            `toml:"min_playback_duration"`
@@ -175,16 +193,18 @@ func ReadConfig() (Config, error) {
 	filename := fmt.Sprintf("%s/config.toml", configDir)
 	log.Debug().Str("filename", filename).Msg("reading config file")
 
+	//nolint:gosec
+	data, err := os.ReadFile(filename)
+
 	var config Config
 	var configErr error
 
-	//nolint:gosec
-	data, err := os.ReadFile(filename)
 	switch {
 	case err == nil:
 		config, configErr = ParseConfig(data)
 	case os.IsNotExist(err):
-		config, configErr = CreateDefaultConfig(filename)
+		config = DefaultConfig
+		configErr = DefaultConfig.Write(filename)
 	default:
 		configErr = err
 	}
@@ -202,41 +222,6 @@ func ReadConfig() (Config, error) {
 func ParseConfig(data []byte) (Config, error) {
 	var config Config
 	return config, toml.Unmarshal(data, &config)
-}
-
-func CreateDefaultConfig(filename string) (Config, error) {
-	log.Info().
-		Str("filename", filename).
-		Msg("config file does not exist, writing default config")
-
-	config := Config{
-		PollRate:            2,
-		MinPlaybackDuration: 4 * 60,
-		MinPlaybackPercent:  50,
-		Blacklist:           []string{},
-		Regexes:             []RegexReplace{},
-		NotifyOnScrobble:    false,
-		NotifyOnError:       true,
-		Sources: SourcesConfig{
-			DBus:         &DBusConfig{Address: ""},
-			MediaControl: &MediaControlConfig{Command: "media-control", Arguments: []string{"get", "--now"}},
-		},
-		Sinks: SinksConfig{
-			LastFm: &LastFmConfig{Key: "last.fm API key", Secret: "last.fm API secret", SessionKey: "", Username: ""},
-			CSV:    &CSVConfig{Filename: fmt.Sprintf("%s/scrobbles.csv", os.Getenv("HOME"))},
-		},
-	}
-
-	data, err := toml.Marshal(config)
-	if err != nil {
-		return Config{}, fmt.Errorf("failed to marshal default config: %w", err)
-	}
-
-	if err := os.WriteFile(filename, data, 0600); err != nil {
-		return Config{}, fmt.Errorf("failed to write default config: %w", err)
-	}
-
-	return config, nil
 }
 
 func (c *Config) Validate() {
@@ -265,16 +250,15 @@ func (c *Config) Validate() {
 	}
 }
 
-func (c Config) WriteConfig() error {
-	configDir := ConfigDir()
-	fileName := fmt.Sprintf("%s/config.toml", configDir)
+func (c Config) Write(filename string) error {
+	log.Debug().Str("filename", filename).Msg("writing config file")
 
 	data, err := toml.Marshal(c)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(fileName, data, 0600)
+	return os.WriteFile(filename, data, 0600)
 }
 
 func ConfigDir() string {
