@@ -33,7 +33,7 @@ func RunMainLoop(config Config) {
 	ticker := time.NewTicker(time.Second * time.Duration(config.PollRate))
 
 	for {
-		RunMainLoopIteration(
+		RunMainLoopOnce(
 			previouslyPlaying,
 			scrobbledPrevious,
 			playerBlacklist,
@@ -52,7 +52,7 @@ func RunMainLoop(config Config) {
 	}
 }
 
-func RunMainLoopIteration(
+func RunMainLoopOnce(
 	previouslyPlaying map[string]PlaybackStatus,
 	scrobbledPrevious map[string]bool,
 	playerBlacklist []*regexp.Regexp,
