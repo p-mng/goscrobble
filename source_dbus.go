@@ -69,13 +69,15 @@ func (s DBusSource) GetInfo(
 		}
 
 		playbackStatus := PlaybackStatus{
-			Artists:   artists,
-			Track:     track,
-			Album:     album,
-			Duration:  time.Duration(duration * int64(time.Microsecond)),
-			Timestamp: time.Time{},
-			State:     PlaybackState(state),
-			Position:  time.Duration(position * int64(time.Microsecond)),
+			Scrobble: Scrobble{
+				Artists:   artists,
+				Track:     track,
+				Album:     album,
+				Duration:  time.Duration(duration * int64(time.Microsecond)),
+				Timestamp: time.Time{},
+			},
+			State:    PlaybackState(state),
+			Position: time.Duration(position * int64(time.Microsecond)),
 		}
 
 		playbackStatus.RegexReplace(regexes)

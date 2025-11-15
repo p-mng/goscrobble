@@ -19,11 +19,11 @@ func (s CSVSink) Name() string {
 	return "csv"
 }
 
-func (s CSVSink) NowPlaying(_ PlaybackStatus) error {
+func (s CSVSink) NowPlaying(_ Scrobble) error {
 	return nil
 }
 
-func (s CSVSink) Scrobble(p PlaybackStatus) error {
+func (s CSVSink) Scrobble(scrobble Scrobble) error {
 	var scrobbles [][]string
 
 	file, err := os.Open(s.Filename)
@@ -40,7 +40,7 @@ func (s CSVSink) Scrobble(p PlaybackStatus) error {
 
 	scrobbles = append(
 		scrobbles,
-		CreateRow(p.JoinArtists(), p.Track, p.Album, p.Duration, p.Timestamp),
+		CreateRow(scrobble.JoinArtists(), scrobble.Track, scrobble.Album, scrobble.Duration, scrobble.Timestamp),
 	)
 
 	newFile, err := os.Create(s.Filename)

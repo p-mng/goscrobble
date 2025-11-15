@@ -78,13 +78,15 @@ func TestMainLoop(t *testing.T) {
 	require.Equal(t, mockNotifier.Notifications, 2)
 
 	newPlaybackStatus := main.PlaybackStatus{
-		Artists:   []string{"Placebo"},
-		Track:     "Every You Every Me",
-		Album:     "Without You I'm Nothing",
-		Duration:  time.Duration(time.Minute*3 + time.Second*34),
-		Timestamp: defaultPlaybackStatus.Timestamp.Add(defaultPlaybackStatus.Duration),
-		State:     main.PlaybackPlaying,
-		Position:  time.Duration(0),
+		Scrobble: main.Scrobble{
+			Artists:   []string{"Placebo"},
+			Track:     "Every You Every Me",
+			Album:     "Without You I'm Nothing",
+			Duration:  time.Duration(time.Minute*3 + time.Second*34),
+			Timestamp: defaultPlaybackStatus.Timestamp.Add(defaultPlaybackStatus.Duration),
+		},
+		State:    main.PlaybackPlaying,
+		Position: time.Duration(0),
 	}
 
 	fakeSource.PlaybackStatus = newPlaybackStatus

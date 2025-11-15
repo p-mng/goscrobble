@@ -209,7 +209,7 @@ func SendNowPlaying(player string,
 		Interface("status", status).
 		Msg("updating now playing status")
 
-	if err := sink.NowPlaying(status); err != nil {
+	if err := sink.NowPlaying(status.Scrobble); err != nil {
 		log.Error().
 			Str("player", player).
 			Str("sink", sink.Name()).
@@ -247,7 +247,7 @@ func SendScrobble(player string,
 		Interface("status", status).
 		Msg("saving scrobble")
 
-	if err := sink.Scrobble(status); err != nil {
+	if err := sink.Scrobble(status.Scrobble); err != nil {
 		log.Error().
 			Str("player", player).
 			Str("sink", sink.Name()).

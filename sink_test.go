@@ -7,8 +7,8 @@ import (
 )
 
 type FakeSink struct {
-	NowPlayingLog []main.PlaybackStatus
-	ScrobbleLog   []main.PlaybackStatus
+	NowPlayingLog []main.Scrobble
+	ScrobbleLog   []main.Scrobble
 	Error         bool
 }
 
@@ -16,7 +16,7 @@ func (*FakeSink) Name() string {
 	return "fake sink"
 }
 
-func (s *FakeSink) NowPlaying(p main.PlaybackStatus) error {
+func (s *FakeSink) NowPlaying(p main.Scrobble) error {
 	if s.Error {
 		return errors.New("fake error")
 	}
@@ -24,7 +24,7 @@ func (s *FakeSink) NowPlaying(p main.PlaybackStatus) error {
 	return nil
 }
 
-func (s *FakeSink) Scrobble(p main.PlaybackStatus) error {
+func (s *FakeSink) Scrobble(p main.Scrobble) error {
 	if s.Error {
 		return errors.New("fake error")
 	}

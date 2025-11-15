@@ -6,19 +6,24 @@ import (
 	"time"
 
 	"github.com/jinzhu/copier"
-	"github.com/p-mng/goscrobble"
+	main "github.com/p-mng/goscrobble"
 	"github.com/stretchr/testify/require"
 )
 
-var defaultPlaybackStatus = main.PlaybackStatus{
-	Artists:   []string{"Placebo", "David Bowie"},
-	Track:     "Without You I'm Nothing",
-	Album:     "A Place For Us To Dream",
-	Duration:  time.Duration(time.Second * 251),
-	Timestamp: time.Unix(1699225080, 0),
-	State:     main.PlaybackPlaying,
-	Position:  time.Duration(time.Second * 110),
-}
+var (
+	defaultScrobble = main.Scrobble{
+		Artists:   []string{"Placebo", "David Bowie"},
+		Track:     "Without You I'm Nothing",
+		Album:     "A Place For Us To Dream",
+		Duration:  time.Duration(time.Second * 251),
+		Timestamp: time.Unix(1699225080, 0),
+	}
+	defaultPlaybackStatus = main.PlaybackStatus{
+		Scrobble: defaultScrobble,
+		State:    main.PlaybackPlaying,
+		Position: time.Duration(time.Second * 110),
+	}
+)
 
 func TestPlaybackStatusJoinArtists(t *testing.T) {
 	require.Equal(t, "Placebo, David Bowie", defaultPlaybackStatus.JoinArtists())

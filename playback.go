@@ -18,13 +18,16 @@ const (
 	PlaybackStopped = PlaybackState("Stopped")
 )
 
-type PlaybackStatus struct {
+type Scrobble struct {
 	Artists   []string
 	Track     string
 	Album     string
 	Duration  time.Duration
 	Timestamp time.Time
+}
 
+type PlaybackStatus struct {
+	Scrobble
 	State    PlaybackState
 	Position time.Duration
 }
@@ -37,32 +40,33 @@ type ParsedRegexReplace struct {
 	Album   bool
 }
 
-func (p PlaybackStatus) JoinArtists() string {
-	return strings.Join(p.Artists, ", ")
+func (s Scrobble) JoinArtists() string {
+	return strings.Join(s.Artists, ", ")
 }
 
 func (p PlaybackStatus) Equals(other PlaybackStatus) bool {
 	return reflect.DeepEqual(p.Artists, other.Artists) &&
 		p.Track == other.Track &&
-		p.Album == other.Album
+		p.Album == other.Album &&
+		p.Duration == other.Duration
 }
 
-func (p PlaybackStatus) IsValid() bool {
+func (s Scrobble) IsValid() bool {
 	switch {
-	case p.Album == "":
+	case s.JoinArtists() == "":
 		return false
-	case p.Track == "":
+	case s.Track == "":
 		return false
-	case p.JoinArtists() == "":
+	case s.Album == "":
 		return false
-	case p.Duration == 0:
+	case s.Duration == 0:
 		return false
 	default:
 		return true
 	}
 }
 
-func (p *PlaybackStatus) RegexReplace(regexes []ParsedRegexReplace) {
+func (s *Scrobble) RegexReplace(regexes []ParsedRegexReplace) {
 	for _, r := range regexes {
 		log.Debug().
 			Str("expression", r.Match.String()).
@@ -71,17 +75,17 @@ func (p *PlaybackStatus) RegexReplace(regexes []ParsedRegexReplace) {
 
 		if r.Artist {
 			var newArtists []string
-			for _, artist := range p.Artists {
+			for _, artist := range s.Artists {
 				newArtist := r.Match.ReplaceAllString(artist, r.Replace)
 				newArtists = append(newArtists, newArtist)
 			}
-			p.Artists = newArtists
+			s.Artists = newArtists
 		}
 		if r.Track {
-			p.Track = r.Match.ReplaceAllString(p.Track, r.Replace)
+			s.Track = r.Match.ReplaceAllString(s.Track, r.Replace)
 		}
 		if r.Album {
-			p.Album = r.Match.ReplaceAllString(p.Album, r.Replace)
+			s.Album = r.Match.ReplaceAllString(s.Album, r.Replace)
 		}
 	}
 }

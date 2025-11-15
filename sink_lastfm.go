@@ -31,24 +31,24 @@ func (s LastFmSink) Name() string {
 	return "last.fm"
 }
 
-func (s LastFmSink) NowPlaying(p PlaybackStatus) error {
+func (s LastFmSink) NowPlaying(scrobble Scrobble) error {
 	_, err := s.Client.TrackUpdateNowPlaying(lastfm.P{
-		"artist":   p.JoinArtists(),
-		"track":    p.Track,
-		"album":    p.Album,
-		"duration": max(int(p.Duration.Seconds()), 30),
+		"artist":   scrobble.JoinArtists(),
+		"track":    scrobble.Track,
+		"album":    scrobble.Album,
+		"duration": max(int(scrobble.Duration.Seconds()), 30),
 		"sk":       s.SessionKey,
 	})
 	return err
 }
 
-func (s LastFmSink) Scrobble(p PlaybackStatus) error {
+func (s LastFmSink) Scrobble(scrobble Scrobble) error {
 	_, err := s.Client.TrackScrobble(lastfm.P{
-		"artist":    p.JoinArtists(),
-		"track":     p.Track,
-		"album":     p.Album,
-		"duration":  max(int(p.Duration.Seconds()), 30),
-		"timestamp": p.Timestamp.Unix(),
+		"artist":    scrobble.JoinArtists(),
+		"track":     scrobble.Track,
+		"album":     scrobble.Album,
+		"duration":  max(int(scrobble.Duration.Seconds()), 30),
+		"timestamp": scrobble.Timestamp.Unix(),
 		"sk":        s.SessionKey,
 	})
 	return err

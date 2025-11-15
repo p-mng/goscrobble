@@ -54,13 +54,15 @@ func (s MediaControlSource) GetInfo(
 	}
 
 	playbackStatus := PlaybackStatus{
-		Artists:   []string{outputParsed.Artist},
-		Track:     outputParsed.Title,
-		Album:     outputParsed.Album,
-		Duration:  time.Duration(outputParsed.Duration * float64(time.Second)),
-		Timestamp: time.Time{},
-		State:     state,
-		Position:  time.Duration(outputParsed.ElapsedTimeNow * float64(time.Second)),
+		Scrobble: Scrobble{
+			Artists:   []string{outputParsed.Artist},
+			Track:     outputParsed.Title,
+			Album:     outputParsed.Album,
+			Duration:  time.Duration(outputParsed.Duration * float64(time.Second)),
+			Timestamp: outputParsed.Timestamp,
+		},
+		State:    state,
+		Position: time.Duration(outputParsed.ElapsedTimeNow * float64(time.Second)),
 	}
 
 	playbackStatus.RegexReplace(regexes)
