@@ -25,7 +25,7 @@ var (
 	}
 )
 
-func TestPlaybackStatusJoinArtists(t *testing.T) {
+func TestScrobbleJoinArtists(t *testing.T) {
 	require.Equal(t, "Placebo, David Bowie", defaultPlaybackStatus.JoinArtists())
 }
 
@@ -40,23 +40,21 @@ func TestPlaybackStatusEquals(t *testing.T) {
 	require.False(t, defaultPlaybackStatus.Equals(copied))
 }
 
-func TestPlaybackStatusIsValid(t *testing.T) {
-	copied := main.PlaybackStatus{}
-	err := copier.Copy(&copied, &defaultPlaybackStatus)
+func TestScrobbleIsValid(t *testing.T) {
+	copied := main.Scrobble{}
+	err := copier.Copy(&copied, &defaultScrobble)
 	require.NoError(t, err)
 
-	require.True(t, defaultPlaybackStatus.IsValid())
+	require.True(t, defaultScrobble.IsValid())
 
 	copied.Album = ""
 	require.False(t, copied.IsValid())
 }
 
-func TestPlaybackStatusRegexReplace(t *testing.T) {
-	copied := main.PlaybackStatus{}
-	err := copier.Copy(&copied, &defaultPlaybackStatus)
+func TestScrobbleRegexReplace(t *testing.T) {
+	copied := main.Scrobble{}
+	err := copier.Copy(&copied, &defaultScrobble)
 	require.NoError(t, err)
-
-	require.Equal(t, "Without You I'm Nothing", defaultPlaybackStatus.Track)
 
 	copied.RegexReplace([]main.ParsedRegexReplace{
 		{
@@ -76,7 +74,7 @@ func TestPlaybackStatusRegexReplace(t *testing.T) {
 	})
 	require.Equal(t, "DavidBowie", copied.Artists[1])
 	require.Equal(t, "With You I'm Nothing", copied.Track)
-	require.Equal(t, "With You I'm Nothing", copied.Track)
+	require.Equal(t, "A Place For Us To Dream", copied.Album)
 }
 
 func TestIsBlacklisted(t *testing.T) {
