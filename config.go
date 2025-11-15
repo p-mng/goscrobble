@@ -10,6 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const DefaultConfigFileName = "config.toml"
+
 var DefaultConfig = Config{
 	PollRate:            2,
 	MinPlaybackDuration: 4 * 60,
@@ -190,7 +192,7 @@ func ReadConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to create config directory: %w", err)
 	}
 
-	filename := fmt.Sprintf("%s/config.toml", configDir)
+	filename := fmt.Sprintf("%s/%s", configDir, DefaultConfigFileName)
 	log.Debug().Str("filename", filename).Msg("reading config file")
 
 	//nolint:gosec

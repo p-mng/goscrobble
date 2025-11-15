@@ -122,7 +122,7 @@ func ActionAuthLastFm(_ context.Context, cmd *cli.Command) error {
 	config.Sinks.LastFm.SessionKey = session.Session.Key
 	config.Sinks.LastFm.Username = session.Session.Name
 
-	filename := fmt.Sprintf("%s/%s", ConfigDir(), "goscrobble.toml")
+	filename := fmt.Sprintf("%s/%s", ConfigDir(), DefaultConfigFileName)
 
 	if err := config.Write(filename); err != nil {
 		log.Error().Err(err).Msg("failed to write updated config file")

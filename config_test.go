@@ -35,7 +35,7 @@ func TestConfigValidate(t *testing.T) {
 }
 
 func TestConfigWrite(t *testing.T) {
-	filename := fmt.Sprintf("%s/config.toml", t.TempDir())
+	filename := fmt.Sprintf("%s/%s", t.TempDir(), main.DefaultConfigFileName)
 
 	err := main.DefaultConfig.Write(filename)
 	require.NoError(t, err)
