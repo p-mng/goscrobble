@@ -56,6 +56,14 @@ func TestMainLoop(t *testing.T) {
 	require.Equal(t, mockNotifier.Notifications, 0)
 
 	fakeSource.Empty = false
+	fakeSource.PlaybackStatus.State = main.PlaybackPaused
+
+	runLoop()
+	require.Len(t, fakeSink.NowPlayingLog, 0)
+	require.Len(t, fakeSink.ScrobbleLog, 0)
+	require.Equal(t, mockNotifier.Notifications, 0)
+
+	fakeSource.PlaybackStatus.State = main.PlaybackPlaying
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 1)
@@ -80,6 +88,14 @@ func TestMainLoop(t *testing.T) {
 	}
 
 	fakeSource.PlaybackStatus = newPlaybackStatus
+	fakeSource.PlaybackStatus.State = main.PlaybackPaused
+
+	runLoop()
+	require.Len(t, fakeSink.NowPlayingLog, 1)
+	require.Len(t, fakeSink.ScrobbleLog, 1)
+	require.Equal(t, mockNotifier.Notifications, 2)
+
+	fakeSource.PlaybackStatus.State = main.PlaybackPlaying
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 2)

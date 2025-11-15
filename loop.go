@@ -114,7 +114,7 @@ func RunMainLoopOnce(
 			continue
 		}
 
-		if !status.Equals(previouslyPlaying[player]) {
+		if !status.Equals(previouslyPlaying[player]) && status.State == PlaybackPlaying {
 			status.Position = time.Duration(0)
 			status.Timestamp = time.Now()
 
