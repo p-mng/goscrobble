@@ -6,27 +6,27 @@ import (
 	main "github.com/p-mng/goscrobble"
 )
 
-type MockSink struct {
+type FakeSink struct {
 	NowPlayingLog []main.PlaybackStatus
 	ScrobbleLog   []main.PlaybackStatus
 	Error         bool
 }
 
-func (*MockSink) Name() string {
-	return "mock-sink"
+func (*FakeSink) Name() string {
+	return "fake sink"
 }
 
-func (s *MockSink) NowPlaying(p main.PlaybackStatus) error {
+func (s *FakeSink) NowPlaying(p main.PlaybackStatus) error {
 	if s.Error {
-		return errors.New("mock error")
+		return errors.New("fake error")
 	}
 	s.NowPlayingLog = append(s.NowPlayingLog, p)
 	return nil
 }
 
-func (s *MockSink) Scrobble(p main.PlaybackStatus) error {
+func (s *FakeSink) Scrobble(p main.PlaybackStatus) error {
 	if s.Error {
-		return errors.New("mock error")
+		return errors.New("fake error")
 	}
 	s.ScrobbleLog = append(s.ScrobbleLog, p)
 	return nil

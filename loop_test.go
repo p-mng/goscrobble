@@ -9,11 +9,11 @@ import (
 )
 
 func TestSendNowPlaying(t *testing.T) {
-	mockSink := MockSink{}
-	mockNotifier := MockNotifier{}
+	mockSink := FakeSink{}
+	mockNotifier := FakeNotifier{}
 
 	main.SendNowPlaying(
-		"mock-player",
+		"mock player",
 		&mockSink,
 		defaultPlaybackStatus,
 		true,
@@ -25,7 +25,7 @@ func TestSendNowPlaying(t *testing.T) {
 	mockSink.Error = true
 
 	main.SendNowPlaying(
-		"mock-player",
+		"mock player",
 		&mockSink,
 		defaultPlaybackStatus,
 		true,
@@ -36,11 +36,11 @@ func TestSendNowPlaying(t *testing.T) {
 }
 
 func TestSendScrobble(t *testing.T) {
-	mockSink := MockSink{}
-	mockNotifier := MockNotifier{}
+	mockSink := FakeSink{}
+	mockNotifier := FakeNotifier{}
 
 	main.SendScrobble(
-		"mock-player",
+		"mock player",
 		&mockSink,
 		defaultPlaybackStatus,
 		true,
@@ -52,7 +52,7 @@ func TestSendScrobble(t *testing.T) {
 	mockSink.Error = true
 
 	main.SendScrobble(
-		"mock-player",
+		"mock player",
 		&mockSink,
 		defaultPlaybackStatus,
 		true,
