@@ -32,7 +32,7 @@ func TestMainLoop(t *testing.T) {
 	notifyOnScrobble := true
 	notifyOnError := true
 
-	mockNotifier := FakeNotifier{}
+	fakeNotifier := FakeNotifier{}
 
 	runLoop := func() {
 		main.RunMainLoopOnce(
@@ -46,14 +46,14 @@ func TestMainLoop(t *testing.T) {
 			minPlaybackPercent,
 			notifyOnScrobble,
 			notifyOnError,
-			mockNotifier.SendNotification,
+			fakeNotifier.SendNotification,
 		)
 	}
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 0)
 	require.Len(t, fakeSink.ScrobbleLog, 0)
-	require.Equal(t, mockNotifier.Notifications, 0)
+	require.Equal(t, fakeNotifier.Notifications, 0)
 
 	fakeSource.Empty = false
 	fakeSource.PlaybackStatus.State = main.PlaybackPaused
@@ -61,21 +61,21 @@ func TestMainLoop(t *testing.T) {
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 0)
 	require.Len(t, fakeSink.ScrobbleLog, 0)
-	require.Equal(t, mockNotifier.Notifications, 0)
+	require.Equal(t, fakeNotifier.Notifications, 0)
 
 	fakeSource.PlaybackStatus.State = main.PlaybackPlaying
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 1)
 	require.Len(t, fakeSink.ScrobbleLog, 0)
-	require.Equal(t, mockNotifier.Notifications, 1)
+	require.Equal(t, fakeNotifier.Notifications, 1)
 
 	fakeSource.PlaybackStatus.Position = time.Duration(time.Second * 241)
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 1)
 	require.Len(t, fakeSink.ScrobbleLog, 1)
-	require.Equal(t, mockNotifier.Notifications, 2)
+	require.Equal(t, fakeNotifier.Notifications, 2)
 
 	newPlaybackStatus := main.PlaybackStatus{
 		Scrobble: main.Scrobble{
@@ -95,21 +95,21 @@ func TestMainLoop(t *testing.T) {
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 1)
 	require.Len(t, fakeSink.ScrobbleLog, 1)
-	require.Equal(t, mockNotifier.Notifications, 2)
+	require.Equal(t, fakeNotifier.Notifications, 2)
 
 	fakeSource.PlaybackStatus.State = main.PlaybackPlaying
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 1)
-	require.Equal(t, mockNotifier.Notifications, 3)
+	require.Equal(t, fakeNotifier.Notifications, 3)
 
 	fakeSource.PlaybackStatus.Position = time.Duration(time.Minute * 2)
 
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 2)
-	require.Equal(t, mockNotifier.Notifications, 4)
+	require.Equal(t, fakeNotifier.Notifications, 4)
 
 	fakeSource.PlaybackStatus = defaultPlaybackStatus
 	fakeSink.Error = true
@@ -117,7 +117,7 @@ func TestMainLoop(t *testing.T) {
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 2)
-	require.Equal(t, mockNotifier.Notifications, 6)
+	require.Equal(t, fakeNotifier.Notifications, 6)
 
 	fakeSource.Empty = true
 	fakeSink.Error = false
@@ -125,7 +125,7 @@ func TestMainLoop(t *testing.T) {
 	runLoop()
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 2)
-	require.Equal(t, mockNotifier.Notifications, 6)
+	require.Equal(t, fakeNotifier.Notifications, 6)
 }
 
 func TestCompilePlayerBlacklist(t *testing.T) {
@@ -137,57 +137,57 @@ func TestCompilePlayerBlacklist(t *testing.T) {
 }
 
 func TestSendNowPlaying(t *testing.T) {
-	mockSink := FakeSink{}
-	mockNotifier := FakeNotifier{}
+	fakeSink := FakeSink{}
+	fakeNotifier := FakeNotifier{}
 
 	main.SendNowPlaying(
-		"mock player",
-		&mockSink,
+		"fake player",
+		&fakeSink,
 		defaultPlaybackStatus,
 		true,
-		mockNotifier.SendNotification,
+		fakeNotifier.SendNotification,
 	)
-	require.Len(t, mockSink.NowPlayingLog, 1)
-	require.Equal(t, 0, mockNotifier.Notifications)
+	require.Len(t, fakeSink.NowPlayingLog, 1)
+	require.Equal(t, 0, fakeNotifier.Notifications)
 
-	mockSink.Error = true
+	fakeSink.Error = true
 
 	main.SendNowPlaying(
-		"mock player",
-		&mockSink,
+		"fake player",
+		&fakeSink,
 		defaultPlaybackStatus,
 		true,
-		mockNotifier.SendNotification,
+		fakeNotifier.SendNotification,
 	)
-	require.Len(t, mockSink.NowPlayingLog, 1)
-	require.Equal(t, 1, mockNotifier.Notifications)
+	require.Len(t, fakeSink.NowPlayingLog, 1)
+	require.Equal(t, 1, fakeNotifier.Notifications)
 }
 
 func TestSendScrobble(t *testing.T) {
-	mockSink := FakeSink{}
-	mockNotifier := FakeNotifier{}
+	fakeSink := FakeSink{}
+	fakeNotifier := FakeNotifier{}
 
 	main.SendScrobble(
-		"mock player",
-		&mockSink,
+		"fake player",
+		&fakeSink,
 		defaultPlaybackStatus,
 		true,
-		mockNotifier.SendNotification,
+		fakeNotifier.SendNotification,
 	)
-	require.Len(t, mockSink.ScrobbleLog, 1)
-	require.Equal(t, 0, mockNotifier.Notifications)
+	require.Len(t, fakeSink.ScrobbleLog, 1)
+	require.Equal(t, 0, fakeNotifier.Notifications)
 
-	mockSink.Error = true
+	fakeSink.Error = true
 
 	main.SendScrobble(
-		"mock player",
-		&mockSink,
+		"fake player",
+		&fakeSink,
 		defaultPlaybackStatus,
 		true,
-		mockNotifier.SendNotification,
+		fakeNotifier.SendNotification,
 	)
-	require.Len(t, mockSink.ScrobbleLog, 1)
-	require.Equal(t, 1, mockNotifier.Notifications)
+	require.Len(t, fakeSink.ScrobbleLog, 1)
+	require.Equal(t, 1, fakeNotifier.Notifications)
 }
 
 func TestMinPlayTime(t *testing.T) {
