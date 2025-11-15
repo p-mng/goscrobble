@@ -78,6 +78,9 @@ func TestIsBlacklisted(t *testing.T) {
 	}
 
 	for k, v := range expected {
-		require.Equal(t, main.IsBlacklisted(blacklist, k), v)
+		t.Run(k, func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, main.IsBlacklisted(blacklist, k), v)
+		})
 	}
 }
