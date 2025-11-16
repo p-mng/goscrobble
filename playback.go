@@ -137,7 +137,7 @@ func ScrobbleFromCSV(input string) (Scrobble, error) {
 		Track:     parts[1],
 		Album:     parts[2],
 		Duration:  duration,
-		Timestamp: timestamp,
+		Timestamp: timestamp.In(time.Local),
 	}, nil
 }
 

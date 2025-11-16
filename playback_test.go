@@ -24,18 +24,6 @@ var (
 		State:    main.PlaybackPlaying,
 		Position: time.Duration(time.Second * 110),
 	}
-
-	defaultScrobbleCSV = []string{
-		"Placebo, David Bowie",
-		"Without You I'm Nothing",
-		"A Place For Us To Dream",
-		"251000",
-		defaultScrobble.Timestamp.Format(time.RFC1123),
-	}
-	defaultScrobbleCSVLine = fmt.Sprintf(
-		`"Placebo, David Bowie",Without You I'm Nothing,A Place For Us To Dream,251000,"%s"`,
-		defaultScrobble.Timestamp.Format(time.RFC1123),
-	)
 )
 
 func TestScrobbleJoinArtists(t *testing.T) {
@@ -91,11 +79,20 @@ func TestScrobbleRegexReplace(t *testing.T) {
 }
 
 func TestScrobbleToStringSlice(t *testing.T) {
-	require.Equal(t, defaultScrobbleCSV, defaultScrobble.ToStringSlice())
+	require.Equal(t, []string{
+		"Placebo, David Bowie",
+		"Without You I'm Nothing",
+		"A Place For Us To Dream",
+		"251000",
+		defaultScrobble.Timestamp.Format(time.RFC1123),
+	}, defaultScrobble.ToStringSlice())
 }
 
 func TestScrobbleFromCSV(t *testing.T) {
-	scrobble, err := main.ScrobbleFromCSV(defaultScrobbleCSVLine)
+	scrobble, err := main.ScrobbleFromCSV(fmt.Sprintf(
+		`"Placebo, David Bowie",Without You I'm Nothing,A Place For Us To Dream,251000,"%s"`,
+		defaultScrobble.Timestamp.Format(time.RFC1123),
+	))
 	require.NoError(t, err)
 	require.Equal(t, defaultScrobble, scrobble)
 }
