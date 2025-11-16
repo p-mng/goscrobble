@@ -2,6 +2,7 @@ package main_test
 
 import (
 	"errors"
+	"time"
 
 	main "github.com/p-mng/goscrobble"
 )
@@ -30,4 +31,8 @@ func (s *FakeSink) Scrobble(p main.Scrobble) error {
 	}
 	s.ScrobbleLog = append(s.ScrobbleLog, p)
 	return nil
+}
+
+func (s *FakeSink) GetScrobbles(_ int, _, _ time.Time) ([]main.Scrobble, error) {
+	return []main.Scrobble{}, nil
 }

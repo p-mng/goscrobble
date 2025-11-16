@@ -2,8 +2,11 @@ package main
 
 import (
 	"errors"
+	"strings"
+	"time"
 
 	lastfm "github.com/p-mng/lastfm-go"
+	"github.com/rs/zerolog/log"
 )
 
 type LastFmSink struct {
@@ -52,4 +55,59 @@ func (s LastFmSink) Scrobble(scrobble Scrobble) error {
 		"sk":        s.SessionKey,
 	})
 	return err
+}
+
+func (s LastFmSink) GetScrobbles(limit int, from, to time.Time) ([]Scrobble, error) {
+	currentPage := 1
+	totalPages := int64(1)
+
+	var scrobbles []Scrobble
+
+outer:
+	for {
+		params := lastfm.P{
+			"limit":    min(limit, 200),
+			"user":     s.Username,
+			"page":     currentPage,
+			"from":     from.Unix(),
+			"extended": 1,
+			"to":       to.Unix(),
+		}
+
+		log.Debug().Int("current page", currentPage).Interface("params", params).Msg("fetching page from last.fm API")
+		page, err := s.Client.UserGetRecentTracks(params)
+		if err != nil {
+			return nil, err
+		}
+
+		if page.RecentTracks.TotalPages != totalPages {
+			log.Debug().Int64("total pages", totalPages).Msg("updated number of total pages")
+			totalPages = page.RecentTracks.TotalPages
+		}
+
+		log.Debug().Int("length", len(page.RecentTracks.Tracks)).Msg("converting scrobbles")
+
+		for _, track := range page.RecentTracks.Tracks {
+			scrobbles = append(scrobbles, Scrobble{
+				// FIXME: this does not work in some cases (e.g., "Tyler, the Creator")
+				Artists:   strings.Split(track.Artist.Name, ", "),
+				Track:     track.Name,
+				Album:     track.Album.Name,
+				Duration:  time.Duration(0),
+				Timestamp: time.Unix(track.Date.UTS, 0),
+			})
+			if len(scrobbles) >= limit {
+				log.Debug().Int("limit", limit).Msg("reached limit")
+				break outer
+			}
+		}
+
+		if int64(currentPage) >= totalPages {
+			log.Debug().Msg("reached last page")
+			break outer
+		}
+		currentPage++
+	}
+
+	return scrobbles, nil
 }

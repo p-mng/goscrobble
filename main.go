@@ -7,7 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	lastfm "github.com/p-mng/lastfm-go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -39,6 +41,41 @@ func main() {
 				Action: ActionRun,
 			},
 			{
+				Name:  "scrobbles",
+				Usage: "Print scrobbles for the given sink",
+				Flags: []cli.Flag{
+					&cli.IntFlag{
+						Name:    "limit",
+						Aliases: []string{"l"},
+						Value:   10,
+						Usage:   "maximum number of scrobbles to display",
+					},
+					&cli.TimestampFlag{
+						Name:        "from",
+						Aliases:     []string{"f"},
+						Value:       time.Now().Add(-14 * 24 * time.Hour),
+						DefaultText: "current datetime minus 14 days",
+						Usage:       "only display scrobbles after this time",
+					},
+					&cli.TimestampFlag{
+						Name:        "to",
+						Aliases:     []string{"t"},
+						Value:       time.Now(),
+						DefaultText: "current datetime",
+						Usage:       "only display scrobbles before this time",
+					},
+				},
+				Arguments: []cli.Argument{
+					&cli.StringArg{Name: "sink"},
+				},
+				Action: ActionScrobbles,
+			},
+			{
+				Name:   "list-sinks",
+				Usage:  "Print names of all configured sinks",
+				Action: ActionListSinks,
+			},
+			{
 				Name:   "lastfm-auth",
 				Usage:  "Authenticate last.fm sand save session key and username",
 				Action: ActionAuthLastFm,
@@ -47,7 +84,7 @@ func main() {
 	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		panic(err)
+		fmt.Println("Error:", err.Error())
 	}
 }
 
@@ -66,6 +103,73 @@ func ActionRun(_ context.Context, cmd *cli.Command) error {
 	return nil
 }
 
+func ActionScrobbles(_ context.Context, cmd *cli.Command) error {
+	SetupLogger(cmd)
+
+	limit := cmd.Int("limit")
+	from := cmd.Timestamp("from")
+	to := cmd.Timestamp("to")
+
+	sinkName := cmd.StringArg("sink")
+
+	if sinkName == "" {
+		fmt.Println("No sink provided. Run `goscrobble list-sinks` to list all configured sinks.")
+		return nil
+	}
+
+	config, err := ReadConfig()
+	if err != nil {
+		fmt.Println("Error reading config file:", err.Error())
+		return nil
+	}
+
+	var sink Sink
+	for _, s := range config.SetupSinks() {
+		if s.Name() == sinkName {
+			sink = s
+			break
+		}
+	}
+
+	if sink == nil {
+		fmt.Println("Invalid sink name. Run `goscrobble list-sinks` to list all configured sinks.")
+		return nil
+	}
+
+	scrobbles, err := sink.GetScrobbles(limit, from, to)
+	if err != nil {
+		fmt.Println("Error fetching scrobbles:", err.Error())
+		return nil
+	}
+
+	tbl := table.NewWriter()
+	tbl.SetOutputMirror(os.Stdout)
+
+	tbl.AppendHeader(table.Row{"Artists", "Track", "Album", "Duration", "Timestamp"})
+	for _, s := range scrobbles {
+		tbl.AppendRow(table.Row{s.JoinArtists(), s.Track, s.Album, s.Duration, s.Timestamp.Format(time.RFC1123)})
+	}
+
+	tbl.Render()
+
+	return nil
+}
+
+func ActionListSinks(_ context.Context, cmd *cli.Command) error {
+	SetupLogger(cmd)
+
+	config, err := ReadConfig()
+	if err != nil {
+		fmt.Println("Error reading config file:", err.Error())
+	}
+
+	for _, sink := range config.SetupSinks() {
+		fmt.Println(sink.Name())
+	}
+
+	return nil
+}
+
 func ActionAuthLastFm(_ context.Context, cmd *cli.Command) error {
 	SetupLogger(cmd)
 
@@ -77,6 +181,11 @@ func ActionAuthLastFm(_ context.Context, cmd *cli.Command) error {
 
 	if config.Sinks.LastFm == nil {
 		fmt.Println("Error: last.fm sink is not configured")
+		return nil
+	}
+
+	if config.Sinks.LastFm.SessionKey != "" && config.Sinks.LastFm.Username != "" {
+		fmt.Println("last.fm is already authenticated")
 		return nil
 	}
 

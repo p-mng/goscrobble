@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/csv"
+	"errors"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -96,9 +98,47 @@ func (s Scrobble) ToStringSlice() []string {
 		s.JoinArtists(),
 		s.Track,
 		s.Album,
-		strconv.FormatFloat(s.Duration.Seconds(), 'f', 2, 64),
+		strconv.FormatInt(s.Duration.Milliseconds(), 10),
 		s.Timestamp.Format(time.RFC1123),
 	}
+}
+
+func ScrobbleFromCSV(input string) (Scrobble, error) {
+	if strings.ContainsRune(input, '\n') {
+		return Scrobble{}, errors.New("input must be a single line")
+	}
+
+	inputReader := strings.NewReader(input)
+	csvReader := csv.NewReader(inputReader)
+
+	parts, err := csvReader.Read()
+	if err != nil {
+		return Scrobble{}, err
+	}
+
+	if len(parts) != 5 {
+		return Scrobble{}, errors.New("input has invalid number of columns")
+	}
+
+	millis, err := strconv.ParseInt(parts[3], 10, 64)
+	if err != nil {
+		return Scrobble{}, err
+	}
+	duration := time.Millisecond * time.Duration(millis)
+
+	timestamp, err := time.Parse(time.RFC1123, parts[4])
+	if err != nil {
+		return Scrobble{}, err
+	}
+
+	return Scrobble{
+		// FIXME: this does not work in some cases (e.g., "Tyler, the Creator")
+		Artists:   strings.Split(parts[0], ", "),
+		Track:     parts[1],
+		Album:     parts[2],
+		Duration:  duration,
+		Timestamp: timestamp,
+	}, nil
 }
 
 func IsBlacklisted(blacklist []*regexp.Regexp, player string) bool {

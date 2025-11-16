@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -23,6 +24,18 @@ var (
 		State:    main.PlaybackPlaying,
 		Position: time.Duration(time.Second * 110),
 	}
+
+	defaultScrobbleCSV = []string{
+		"Placebo, David Bowie",
+		"Without You I'm Nothing",
+		"A Place For Us To Dream",
+		"251000",
+		defaultScrobble.Timestamp.Format(time.RFC1123),
+	}
+	defaultScrobbleCSVLine = fmt.Sprintf(
+		`"Placebo, David Bowie",Without You I'm Nothing,A Place For Us To Dream,251000,"%s"`,
+		defaultScrobble.Timestamp.Format(time.RFC1123),
+	)
 )
 
 func TestScrobbleJoinArtists(t *testing.T) {
@@ -78,14 +91,13 @@ func TestScrobbleRegexReplace(t *testing.T) {
 }
 
 func TestScrobbleToStringSlice(t *testing.T) {
-	expected := []string{
-		"Placebo, David Bowie",
-		"Without You I'm Nothing",
-		"A Place For Us To Dream",
-		"251.00",
-		defaultScrobble.Timestamp.Format(time.RFC1123),
-	}
-	require.Equal(t, expected, defaultScrobble.ToStringSlice())
+	require.Equal(t, defaultScrobbleCSV, defaultScrobble.ToStringSlice())
+}
+
+func TestScrobbleFromCSV(t *testing.T) {
+	scrobble, err := main.ScrobbleFromCSV(defaultScrobbleCSVLine)
+	require.NoError(t, err)
+	require.Equal(t, defaultScrobble, scrobble)
 }
 
 func TestIsBlacklisted(t *testing.T) {
