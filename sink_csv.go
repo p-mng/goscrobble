@@ -53,7 +53,9 @@ func (s CSVSink) Scrobble(scrobble Scrobble) error {
 }
 
 func (s CSVSink) GetScrobbles(limit int, from, to time.Time) ([]Scrobble, error) {
-	log.Debug().Str("filename", s.Filename).Msg("opening scrobbles file")
+	log.Debug().
+		Str("filename", s.Filename).
+		Msg("opening scrobbles file")
 
 	file, err := os.Open(s.Filename)
 	if err != nil {
@@ -63,7 +65,9 @@ func (s CSVSink) GetScrobbles(limit int, from, to time.Time) ([]Scrobble, error)
 
 	scanner := bufio.NewScanner(file)
 
-	log.Debug().Str("filename", file.Name()).Msg("reading lines")
+	log.Debug().
+		Str("filename", file.Name()).
+		Msg("reading lines")
 
 	var lines []string
 	for scanner.Scan() {
@@ -73,12 +77,16 @@ func (s CSVSink) GetScrobbles(limit int, from, to time.Time) ([]Scrobble, error)
 		return nil, err
 	}
 
-	log.Debug().Int("length", len(lines)).Msg("reversing slice")
+	log.Debug().
+		Int("length", len(lines)).
+		Msg("reversing slice")
 	slices.Reverse(lines)
 
 	var scrobbles []Scrobble
 
-	log.Debug().Int("length", len(lines)).Msg("processing lines")
+	log.Debug().
+		Int("length", len(lines)).
+		Msg("processing lines")
 
 	for _, line := range lines {
 		scrobble, err := ScrobbleFromCSV(line)
@@ -98,7 +106,9 @@ func (s CSVSink) GetScrobbles(limit int, from, to time.Time) ([]Scrobble, error)
 		scrobbles = append(scrobbles, scrobble)
 
 		if len(scrobbles) >= limit {
-			log.Debug().Int("limit", limit).Msg("reached limit")
+			log.Debug().
+				Int("limit", limit).
+				Msg("reached limit")
 			break
 		}
 	}

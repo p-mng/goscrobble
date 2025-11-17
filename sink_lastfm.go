@@ -74,18 +74,25 @@ outer:
 			"to":       to.Unix(),
 		}
 
-		log.Debug().Int("current page", currentPage).Interface("params", params).Msg("fetching page from last.fm API")
+		log.Debug().
+			Int("current page", currentPage).
+			Interface("params", params).
+			Msg("fetching page from last.fm API")
 		page, err := s.Client.UserGetRecentTracks(params)
 		if err != nil {
 			return nil, err
 		}
 
 		if page.RecentTracks.TotalPages != totalPages {
-			log.Debug().Int64("total pages", totalPages).Msg("updated number of total pages")
+			log.Debug().
+				Int64("total pages", totalPages).
+				Msg("updated number of total pages")
 			totalPages = page.RecentTracks.TotalPages
 		}
 
-		log.Debug().Int("length", len(page.RecentTracks.Tracks)).Msg("converting scrobbles")
+		log.Debug().
+			Int("length", len(page.RecentTracks.Tracks)).
+			Msg("converting scrobbles")
 
 		for _, track := range page.RecentTracks.Tracks {
 			scrobbles = append(scrobbles, Scrobble{
@@ -97,7 +104,9 @@ outer:
 				Timestamp: time.Unix(track.Date.UTS, 0),
 			})
 			if len(scrobbles) >= limit {
-				log.Debug().Int("limit", limit).Msg("reached limit")
+				log.Debug().
+					Int("limit", limit).
+					Msg("reached limit")
 				break outer
 			}
 		}

@@ -9,7 +9,14 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var nowPlayingNotificationID uint32
+var (
+	nowPlayingNotificationID uint32
+	logoLines                = []string{
+		"░█▀▀░█▀█░█▀▀░█▀▀░█▀▄░█▀█░█▀▄░█▀▄░█░░░█▀▀",
+		"░█░█░█░█░▀▀█░█░░░█▀▄░█░█░█▀▄░█▀▄░█░░░█▀▀",
+		"░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░▀▀░░▀▀░░▀▀▀░▀▀▀",
+	}
+)
 
 const (
 	RuneBeamedSixteenthNotes = '\u266C'
@@ -32,6 +39,10 @@ func RunMainLoop(config Config) {
 
 	ticker := time.NewTicker(time.Second * time.Duration(config.PollRate))
 
+	for _, line := range logoLines {
+		log.Info().Msg(line)
+	}
+
 	for {
 		RunMainLoopOnce(
 			previouslyPlaying,
@@ -48,7 +59,9 @@ func RunMainLoop(config Config) {
 		)
 
 		timestamp := <-ticker.C
-		log.Debug().Time("timestamp", timestamp).Msg("finished main loop iteration")
+		log.Debug().
+			Time("timestamp", timestamp).
+			Msg("completed main loop iteration")
 	}
 }
 
@@ -70,7 +83,10 @@ func RunMainLoopOnce(
 	for _, source := range sources {
 		status, err := source.GetInfo(playerBlacklist, parsedRegexes)
 		if err != nil {
-			log.Error().Err(err).Str("source", source.Name()).Msg("error getting current playback status")
+			log.Error().
+				Err(err).
+				Str("source", source.Name()).
+				Msg("error getting current playback status")
 		}
 		maps.Copy(playbackStatus, status)
 	}
@@ -121,7 +137,7 @@ func RunMainLoopOnce(
 			previouslyPlaying[player] = status
 			scrobbledPrevious[player] = false
 
-			log.Info().
+			log.Debug().
 				Str("player", player).
 				Interface("status", status).
 				Msg("started playback of new track")
@@ -133,7 +149,9 @@ func RunMainLoopOnce(
 					fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
 				)
 				if err != nil {
-					log.Error().Err(err).Msg("error sending notification")
+					log.Error().
+						Err(err).
+						Msg("error sending desktop notification")
 				} else {
 					nowPlayingNotificationID = newID
 				}
@@ -163,7 +181,9 @@ func RunMainLoopOnce(
 				fmt.Sprintf("%c scrobbling: %s", RuneCheckMark, status.Track),
 				fmt.Sprintf("%s %c %s", status.JoinArtists(), RuneEmDash, status.Album),
 			); err != nil {
-				log.Error().Err(err).Msg("error sending notification")
+				log.Error().
+					Err(err).
+					Msg("error sending desktop notification")
 			}
 		}
 
@@ -223,7 +243,9 @@ func SendNowPlaying(player string,
 				fmt.Sprintf("%c error updating now playing status (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error updating now playing status: %s", err.Error()),
 			); err != nil {
-				log.Error().Err(err).Msg("error sending notification")
+				log.Error().
+					Err(err).
+					Msg("error sending desktop notification")
 			}
 		}
 	} else {
@@ -261,11 +283,13 @@ func SendScrobble(player string,
 				fmt.Sprintf("%c error saving scrobble (%s)", RuneWarningSign, sink.Name()),
 				fmt.Sprintf("error saving scrobble: %s", err.Error()),
 			); err != nil {
-				log.Error().Err(err).Msg("error sending notification")
+				log.Error().
+					Err(err).
+					Msg("error sending desktop notification")
 			}
 		}
 	} else {
-		log.Info().
+		log.Debug().
 			Str("player", player).
 			Str("sink", sink.Name()).
 			Interface("status", status).

@@ -132,7 +132,9 @@ func (c Config) SetupSinks() []Sink {
 
 		sink, err := LastFmSinkFromConfig(*c.Sinks.LastFm)
 		if err != nil {
-			log.Error().Err(err).Msg("error setting up last.fm sink")
+			log.Error().
+				Err(err).
+				Msg("error setting up last.fm sink")
 		} else {
 			sinks = append(sinks, sink)
 		}
@@ -183,7 +185,9 @@ func ReadConfig() (Config, error) {
 	log.Debug().Msg("reading config")
 
 	configDir := ConfigDir()
-	log.Debug().Str("config dir", configDir).Msg("creating config directory")
+	log.Debug().
+		Str("config dir", configDir).
+		Msg("creating config directory")
 
 	err := os.MkdirAll(configDir, 0700)
 	if os.IsExist(err) {
@@ -193,7 +197,9 @@ func ReadConfig() (Config, error) {
 	}
 
 	filename := fmt.Sprintf("%s/%s", configDir, DefaultConfigFileName)
-	log.Debug().Str("filename", filename).Msg("reading config file")
+	log.Debug().
+		Str("filename", filename).
+		Msg("reading config file")
 
 	//nolint:gosec
 	data, err := os.ReadFile(filename)
@@ -253,7 +259,9 @@ func (c *Config) Validate() {
 }
 
 func (c Config) Write(filename string) error {
-	log.Debug().Str("filename", filename).Msg("writing config file")
+	log.Debug().
+		Str("filename", filename).
+		Msg("writing config file")
 
 	data, err := toml.Marshal(c)
 	if err != nil {

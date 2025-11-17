@@ -93,10 +93,14 @@ func ActionRun(_ context.Context, cmd *cli.Command) error {
 
 	config, err := ReadConfig()
 	if err != nil {
-		log.Error().Err(err).Msg("error reading config file")
+		log.Error().
+			Err(err).
+			Msg("error reading config file")
 		return nil
 	}
-	log.Debug().Any("config", config).Msg("parsed config")
+	log.Debug().
+		Interface("config", config).
+		Msg("parsed config")
 
 	RunMainLoop(config)
 
@@ -234,7 +238,9 @@ func ActionAuthLastFm(_ context.Context, cmd *cli.Command) error {
 	filename := fmt.Sprintf("%s/%s", ConfigDir(), DefaultConfigFileName)
 
 	if err := config.Write(filename); err != nil {
-		log.Error().Err(err).Msg("failed to write updated config file")
+		log.Error().
+			Err(err).
+			Msg("error writing updated config file")
 		return nil
 	}
 
