@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 export GOPROXY=${GOPROXY:-"direct"}
-export GOSCROBBLE_VERSION=${GOSCROBBLE_VERSION:-"v0.5.0"}
+export GOSCROBBLE_VERSION=${GOSCROBBLE_VERSION:-"v0.6.0"}
 REQUIRED_BINS=("go" "envsubst" "sed" "curl")
 
 is_tag() {
