@@ -7,7 +7,7 @@
 A simple, cross-platform music scrobbler daemon. Inspired by audio software like PulseAudio and PipeWire, it can be configured to connect different _sources_ (e.g., media players) and _sinks_ (e.g., last.fm).
 
 > [!WARNING]
-> This project is still beta software. Features may break without warning (especially on macOS), scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
+> This project is still beta software. Features may break without warning, scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
 >
 > **Note:** This README refers to the `main` branch. To view the README for a specific version, check out the corresponding tagged commit.
 
@@ -19,9 +19,9 @@ A simple, cross-platform music scrobbler daemon. Inspired by audio software like
 curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/scripts/install.sh | bash
 ```
 
-This will install the latest tagged version. Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=dev`).
+This will install the latest tagged version. Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=main`).
 
-On macOS, [media-control](https://github.com/ungive/media-control) and [julienXX/terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
+On macOS, [media-control](https://github.com/ungive/media-control) and [terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
 
 ```shell
 brew install media-control terminal-notifier
@@ -29,7 +29,7 @@ brew install media-control terminal-notifier
 
 ### Arch Linux
 
-[`goscrobble`](https://aur.archlinux.org/packages/goscrobble) is available on the Arch User Repository.
+[goscrobble](https://aur.archlinux.org/packages/goscrobble) is available on the Arch User Repository. The package also provides a systemd user service that can be enabled with `systemctl --user enable goscrobble.service`.
 
 ## Configuration
 
@@ -105,7 +105,7 @@ filename = "/network/data/scrobbles.csv"
 
 </details>
 
-You can blacklist players using Go [regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS.
+You can blacklist players using [Go regular expressions](https://gobyexample.com/regular-expressions). Players are identified by their D-Bus service name on Linux or the bundle identifier on macOS.
 
 The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and `org.mpris.MediaPlayer2.firefox.instance_1_84` on Linux and `org.mozilla.firefox` on macOS.
 
@@ -120,7 +120,7 @@ The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and
 
 ### Double scrobbles when using tidal-hifi
 
-tidal-hifi exposes two MPRIS media players (`tidal-hifi` and `chromium`). Right now, you should add `tidal-hifi` to your blacklist, as the album name is incorrectly reported (see [tidal-hifi issue 505](https://github.com/Mastermindzh/tidal-hifi/issues/505)).
+[tidal-hifi](https://github.com/Mastermindzh/tidal-hifi) exposes two MPRIS media players (`tidal-hifi` and `chromium`). You should add either `tidal-hifi` or `chromium` to your blacklist to prevent double scrobbling.
 
 ## Similar projects
 
