@@ -17,6 +17,7 @@ func TestMainLoop(t *testing.T) {
 	parsedRegexes := []main.ParsedRegexReplace{}
 
 	fakeSource := &FakeSource{
+		PlayerName:     "",
 		Empty:          true,
 		Error:          false,
 		PlaybackStatus: defaultPlaybackStatus,
@@ -126,6 +127,66 @@ func TestMainLoop(t *testing.T) {
 	require.Len(t, fakeSink.NowPlayingLog, 2)
 	require.Len(t, fakeSink.ScrobbleLog, 2)
 	require.Equal(t, fakeNotifier.Notifications, 6)
+}
+
+func TestMainLoopRegexes(t *testing.T) {
+	previouslyPlaying := map[string]main.PlaybackStatus{}
+	scrobbledPrevious := map[string]bool{}
+
+	playerBlacklist := []*regexp.Regexp{regexp.MustCompile("player 1")}
+	parsedRegexes := []main.ParsedRegexReplace{{
+		Match:   regexp.MustCompile("^Placebo$"),
+		Replace: "PLACEBO",
+		Artist:  true,
+		Track:   false,
+		Album:   false,
+	}}
+
+	fakeSource1 := &FakeSource{
+		PlayerName:     "fake player 1",
+		Empty:          false,
+		Error:          false,
+		PlaybackStatus: defaultPlaybackStatus,
+	}
+	fakeSource2 := &FakeSource{
+		PlayerName:     "fake player 2",
+		Empty:          false,
+		Error:          false,
+		PlaybackStatus: defaultPlaybackStatus,
+	}
+	sources := []main.Source{fakeSource1, fakeSource2}
+
+	fakeSink := &FakeSink{}
+	sinks := []main.Sink{fakeSink}
+
+	minPlaybackDuration := 4 * 60
+	minPlaybackPercent := 50
+
+	notifyOnScrobble := true
+	notifyOnError := true
+
+	fakeNotifier := FakeNotifier{}
+
+	runLoop := func() {
+		main.RunMainLoopOnce(
+			previouslyPlaying,
+			scrobbledPrevious,
+			playerBlacklist,
+			parsedRegexes,
+			sources,
+			sinks,
+			minPlaybackDuration,
+			minPlaybackPercent,
+			notifyOnScrobble,
+			notifyOnError,
+			fakeNotifier.SendNotification,
+		)
+	}
+
+	require.Len(t, fakeSink.NowPlayingLog, 0)
+	runLoop()
+	require.Len(t, fakeSink.NowPlayingLog, 1)
+	require.Equal(t, "PLACEBO", fakeSink.NowPlayingLog[0].Artists[0])
 }
 
 func TestCompilePlayerBlacklist(t *testing.T) {

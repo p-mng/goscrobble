@@ -81,14 +81,23 @@ func RunMainLoopOnce(
 	playbackStatus := make(map[string]PlaybackStatus)
 
 	for _, source := range sources {
-		status, err := source.GetInfo(playerBlacklist, parsedRegexes)
+		status, err := source.GetInfo()
 		if err != nil {
 			log.Error().
 				Err(err).
 				Str("source", source.Name()).
 				Msg("error getting current playback status")
 		}
+		for player := range status {
+			if IsBlacklisted(playerBlacklist, player) {
+				delete(status, player)
+			}
+		}
 		maps.Copy(playbackStatus, status)
+	}
+
+	for _, status := range playbackStatus {
+		status.RegexReplace(parsedRegexes)
 	}
 
 	for player := range playbackStatus {

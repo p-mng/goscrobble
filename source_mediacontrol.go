@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-	"regexp"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -19,10 +18,7 @@ func (s MediaControlSource) Name() string {
 	return "media-control"
 }
 
-func (s MediaControlSource) GetInfo(
-	playerBlacklist []*regexp.Regexp,
-	regexes []ParsedRegexReplace,
-) (map[string]PlaybackStatus, error) {
+func (s MediaControlSource) GetInfo() (map[string]PlaybackStatus, error) {
 	log.Debug().Msg("getting playback metadata using media-control")
 
 	//nolint:gosec
@@ -39,10 +35,6 @@ func (s MediaControlSource) GetInfo(
 
 	if outputParsed == (MediaControlInfo{}) {
 		log.Debug().Msg("media-control did not find any active players")
-		return map[string]PlaybackStatus{}, nil
-	}
-
-	if IsBlacklisted(playerBlacklist, outputParsed.BundleIdentifier) {
 		return map[string]PlaybackStatus{}, nil
 	}
 
@@ -64,8 +56,6 @@ func (s MediaControlSource) GetInfo(
 		State:    state,
 		Position: time.Duration(outputParsed.ElapsedTimeNow * float64(time.Second)),
 	}
-
-	playbackStatus.RegexReplace(regexes)
 
 	playerName := fmt.Sprintf("%s:%s", s.Name(), outputParsed.BundleIdentifier)
 	return map[string]PlaybackStatus{playerName: playbackStatus}, nil

@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"strings"
 	"time"
 
@@ -19,10 +18,7 @@ func (s DBusSource) Name() string {
 	return "dbus"
 }
 
-func (s DBusSource) GetInfo(
-	playerBlacklist []*regexp.Regexp,
-	regexes []ParsedRegexReplace,
-) (map[string]PlaybackStatus, error) {
+func (s DBusSource) GetInfo() (map[string]PlaybackStatus, error) {
 	var dbusNames []string
 	if err := s.Conn.
 		Object("org.freedesktop.DBus", "/org/freedesktop/DBus").
@@ -33,7 +29,7 @@ func (s DBusSource) GetInfo(
 
 	var playerNames []string
 	for _, name := range dbusNames {
-		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") && !IsBlacklisted(playerBlacklist, name) {
+		if strings.HasPrefix(name, "org.mpris.MediaPlayer2.") {
 			playerNames = append(playerNames, name)
 		}
 	}
@@ -79,8 +75,6 @@ func (s DBusSource) GetInfo(
 			State:    PlaybackState(state),
 			Position: time.Duration(position * int64(time.Microsecond)),
 		}
-
-		playbackStatus.RegexReplace(regexes)
 
 		playerName := fmt.Sprintf("%s:%s", s.Name(), player)
 		playerPlaybackStatus[playerName] = playbackStatus
