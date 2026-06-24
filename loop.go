@@ -96,8 +96,9 @@ func RunMainLoopOnce(
 		maps.Copy(playbackStatus, status)
 	}
 
-	for _, status := range playbackStatus {
+	for player, status := range playbackStatus {
 		status.RegexReplace(parsedRegexes)
+		playbackStatus[player] = status
 	}
 
 	for player := range playbackStatus {
