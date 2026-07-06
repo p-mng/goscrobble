@@ -1,6 +1,6 @@
 # goscrobble 🎧💿
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/p-mng/goscrobble/go.yml) ![GitHub Tag](https://img.shields.io/github/v/tag/p-mng/goscrobble) ![AUR Version](https://img.shields.io/aur/version/goscrobble) [![Go Report Card](https://goreportcard.com/badge/github.com/p-mng/goscrobble)](https://goreportcard.com/report/github.com/p-mng/goscrobble)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/p-mng/goscrobble/go.yml) ![GitHub Tag](https://img.shields.io/github/v/tag/p-mng/goscrobble) ![AUR Version](https://img.shields.io/aur/version/goscrobble)
 
 ## Description
 
