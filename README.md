@@ -13,23 +13,18 @@ A simple, cross-platform music scrobbler daemon. Inspired by audio software like
 
 ## Installation
 
-### Install script
+### Manual Installation
 
-```shell
-curl https://raw.githubusercontent.com/p-mng/goscrobble/refs/heads/main/scripts/install.sh | bash
-```
-
-This will install the latest tagged version. Set `GOSCROBBLE_VERSION` to a branch or tag name to install a specific version (e.g., `export GOSCROBBLE_VERSION=main`).
-
-On macOS, [media-control](https://github.com/ungive/media-control) and [terminal-notifier](https://github.com/julienXX/terminal-notifier) are required:
-
-```shell
-brew install media-control terminal-notifier
-```
+1. Install the binary using `go install github.com/p-mng/goscrobble@latest`.
+2. Install the service file (`goscrobble.service` if on Linux, `io.github.p-mng.goscrobble.plist` if on macOS); replace `$GOSCROBBLE_PATH` with the binary location from the previous step.
+  - Documentation for systemd/Linux: <https://wiki.archlinux.org/title/Systemd/User#Basic_setup>
+  - Documentation for launchd/macOS: <https://support.apple.com/guide/terminal/script-management-with-launchd-apdc6c1077b-5d5d-4d35-9c19-60f2397b2369/mac>
+3. If on macOS, install [media-control](https://github.com/ungive/media-control) and [terminal-notifier](https://github.com/julienXX/terminal-notifier).
+4. Enable and start the service/launch agent.
 
 ### Arch Linux
 
-[goscrobble](https://aur.archlinux.org/packages/goscrobble) is available on the Arch User Repository. The package also provides a systemd user service that can be enabled with `systemctl --user enable goscrobble.service`.
+[goscrobble](https://aur.archlinux.org/packages/goscrobble) is available on the Arch User Repository. The package also provides the systemd user service that can be enabled with `systemctl --user enable goscrobble.service`.
 
 ## Configuration
 
@@ -113,7 +108,7 @@ The example above will block `org.mpris.MediaPlayer2.chromium.instance10670` and
 
 1. [Create an API account](https://www.last.fm/api/account/create). Description, callback URL, and application homepage are not required.
 2. Open the config file and insert the [newly generated API key and shared secret](https://www.last.fm/api/accounts).
-3. Run `goscrobble lastfm-auth`, and authenticate the application in your browser.
+3. Run `goscrobble lastfm-auth` and authenticate the application in your browser.
 4. Return to your terminal and confirm the prompt. The session key and last.fm username will be automatically written to your config file.
 
 ## Known issues
