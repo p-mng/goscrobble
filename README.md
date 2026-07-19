@@ -16,11 +16,13 @@ A simple, cross-platform music scrobbler daemon. Inspired by audio software like
 ### Manual Installation
 
 1. Install the binary using `go install github.com/p-mng/goscrobble@latest`.
-2. Install the service file (`goscrobble.service` if on Linux, `io.github.p-mng.goscrobble.plist` if on macOS); replace `$GOSCROBBLE_PATH` with the binary location from the previous step.
-  - Documentation for systemd/Linux: <https://wiki.archlinux.org/title/Systemd/User#Basic_setup>
-  - Documentation for launchd/macOS: <https://support.apple.com/guide/terminal/script-management-with-launchd-apdc6c1077b-5d5d-4d35-9c19-60f2397b2369/mac>
+2. Install the service file (`goscrobble.service` if on Linux<sup>1</sup>, `io.github.p-mng.goscrobble.plist` if on macOS<sup>2</sup>); replace `$GOSCROBBLE_PATH` with the binary location from the previous step.
 3. If on macOS, install [media-control](https://github.com/ungive/media-control) and [terminal-notifier](https://github.com/julienXX/terminal-notifier).
 4. Enable and start the service/launch agent.
+
+<sup>1</sup>) Documentation for systemd/Linux: <https://wiki.archlinux.org/title/Systemd/User#Basic_setup>
+
+<sup>2</sup>) Documentation for launchd/macOS: <https://support.apple.com/guide/terminal/script-management-with-launchd-apdc6c1077b-5d5d-4d35-9c19-60f2397b2369/mac>
 
 ### Arch Linux
 
