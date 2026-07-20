@@ -13,6 +13,7 @@ func SendNotification(_ uint32, summary, body string) (uint32, error) {
 		Msg("sending desktop notification via terminal-notifier")
 
 	// https://github.com/julienXX/terminal-notifier
+	//nolint:gosec
 	cmd := exec.Command("/usr/bin/env", "terminal-notifier", "-title", "goscrobble", "-subtitle", summary, "-message", body)
 	err := cmd.Run()
 	if err != nil {
