@@ -6,6 +6,8 @@
 
 A simple, cross-platform music scrobbler daemon. Inspired by audio software like PulseAudio and PipeWire, it can be configured to connect different _sources_ (e.g., media players) and _sinks_ (e.g., last.fm).
 
+![goscrobble diagram](assets/diagram.svg)
+
 > [!WARNING]
 > This project is still beta software. Features may break without warning, scrobbling may be unreliable, and the config file format is subject to change. Use at your own risk.
 >
