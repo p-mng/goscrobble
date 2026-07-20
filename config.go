@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -63,6 +64,7 @@ type RegexReplace struct {
 type SourcesConfig struct {
 	DBus         *DBusConfig         `toml:"dbus"`
 	MediaControl *MediaControlConfig `toml:"media-control"`
+	TidalHifi    *TidalHifiConfig    `toml:"tidal-hifi"`
 }
 
 type SinksConfig struct {
@@ -77,6 +79,10 @@ type DBusConfig struct {
 type MediaControlConfig struct {
 	Command   string   `toml:"command"`
 	Arguments []string `toml:"arguments"`
+}
+
+type TidalHifiConfig struct {
+	Endpoint string `toml:"endpoint"`
 }
 
 type LastFmConfig struct {
@@ -122,6 +128,22 @@ func (c Config) SetupSources() []Source {
 		sources = append(sources, MediaControlSource{
 			Command:   c.Sources.MediaControl.Command,
 			Arguments: c.Sources.MediaControl.Arguments,
+		})
+	}
+
+	if c.Sources.TidalHifi != nil {
+		var endpoint string
+		if c.Sources.TidalHifi.Endpoint == "" {
+			log.Debug().Str("endpoint", DefaultTidalHifiEndpoint).Msg("using default endpoint")
+			endpoint = DefaultTidalHifiEndpoint
+		} else {
+			endpoint = c.Sources.TidalHifi.Endpoint
+		}
+
+		log.Debug().Msg("setting up tidal-hifi API source")
+		sources = append(sources, TidalHifiSource{
+			Client:   http.Client{},
+			Endpoint: endpoint,
 		})
 	}
 
