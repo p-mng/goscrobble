@@ -13,7 +13,8 @@ import (
 
 var (
 	defaultScrobble = main.Scrobble{
-		Artists:   []string{"Placebo", "David Bowie"},
+		Artists: []string{"Placebo", "David Bowie"},
+		//nolint:goconst
 		Track:     "Without You I'm Nothing",
 		Album:     "A Place For Us To Dream",
 		Duration:  time.Duration(time.Second * 251),

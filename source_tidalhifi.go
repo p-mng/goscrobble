@@ -52,7 +52,7 @@ func (s TidalHifiSource) GetInfo() (map[string]PlaybackStatus, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer response.Body.Close()
+	defer CloseLogged(response.Body)
 
 	var body TidalHifiAPIResponse
 	if err := json.NewDecoder(response.Body).Decode(&body); err != nil {

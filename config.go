@@ -25,8 +25,12 @@ var DefaultConfig = Config{
 	Sources: SourcesConfig{
 		DBus:         &DBusConfig{Address: ""},
 		MediaControl: &MediaControlConfig{Command: "media-control", Arguments: []string{"get", "--now"}},
+		TidalHifi: &TidalHifiConfig{
+			Endpoint: "http://localhost:47836/current",
+		},
 	},
 	Sinks: SinksConfig{
+		//nolint:gosec
 		LastFm: map[string]LastFmConfig{"default": {
 			BaseURL:    lastfm.BaseURL,
 			Key:        "last.fm API key",

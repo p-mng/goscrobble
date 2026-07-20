@@ -80,8 +80,9 @@ func TestMainLoop(t *testing.T) {
 
 	newPlaybackStatus := main.PlaybackStatus{
 		Scrobble: main.Scrobble{
-			Artists:   []string{"Placebo"},
-			Track:     "Every You Every Me",
+			Artists: []string{"Placebo"},
+			Track:   "Every You Every Me",
+			//nolint:goconst
 			Album:     "Without You I'm Nothing",
 			Duration:  time.Duration(time.Minute*3 + time.Second*34),
 			Timestamp: defaultPlaybackStatus.Timestamp.Add(defaultPlaybackStatus.Duration),
