@@ -71,13 +71,18 @@ track = true
 # dbus address: if empty, connect to the session bus
 address = ""
 
-# ungive/media-control
 # https://github.com/ungive/media-control
 [sources.media-control]
 # path to the "media-control" binary
 command = "media-control"
 # media-control arguments, if empty use the following default value
 arguments = ["get", "--now"]
+
+# https://github.com/Mastermindzh/tidal-hifi
+# TIDAL Hi-Fi JSON API
+[sources.tidal-hifi]
+# endpoint to fetch data from
+endpoint = "http://localhost:47836/current"
 
 [sinks.lastfm.default]
 # replace this for sites that support the Audioscrobbler v2.0 API
