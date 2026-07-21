@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"syscall"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 const DefaultTidalHifiEndpoint = "http://localhost:47836/current"
@@ -50,6 +53,10 @@ func (s TidalHifiSource) Name() string {
 func (s TidalHifiSource) GetInfo() (map[string]PlaybackStatus, error) {
 	response, err := s.Client.Get(s.Endpoint)
 	if err != nil {
+		if errors.Is(err, syscall.ECONNREFUSED) {
+			log.Debug().Msg("connection to API refused; tidal-hifi is likely not running or the API is disabled")
+			return map[string]PlaybackStatus{}, nil
+		}
 		return nil, err
 	}
 	defer CloseLogged(response.Body)
