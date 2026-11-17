@@ -47,7 +47,7 @@ func TestReadConfig(t *testing.T) {
 }
 
 func TestConfigValidate(t *testing.T) {
-	//nolint:exhaustruct
+	//nolint:exhaustruct_v5
 	invalidConfig := main.Config{
 		PollRate:            -20,
 		MinPlaybackDuration: -20,
